@@ -14,9 +14,15 @@ class SplashActivity : AppCompatActivity() {
         val viewModel = ViewModelProvider(this).get(AuthViewModel::class.java)
 
         if (!viewModel.isUserSignedIn()) {
-            val intent = Intent(this, AuthActivity::class.java)
-            startActivity(intent)
-            finish()
+            Intent(this, AuthActivity::class.java).apply {
+                startActivity(this)
+                finish()
+            }
+        } else{
+            Intent(this, HomeActivity::class.java).apply {
+                startActivity(this)
+                finish()
+            }
         }
     }
 }
