@@ -18,6 +18,8 @@ object AuthRepository {
         Timber.plant(Timber.DebugTree())
     }
 
+    fun getFirebaseUser(): FirebaseUser? = firebaseAuth.currentUser
+
     fun isUserSignedIn():Boolean = (firebaseAuth.currentUser != null)
 
     fun signOutUser() = firebaseAuth.signOut()
@@ -34,13 +36,7 @@ object AuthRepository {
                 }
 
                 override fun onVerificationFailed(e: FirebaseException) {
-                    Timber.d("Verification exception: %s", e.message?:"null message")
-                    when (e) {
-                        is FirebaseAuthInvalidCredentialsException -> response.value = FirebaseResponse.INVALID_CREDENTIALS
-                        is FirebaseTooManyRequestsException -> response.value  = FirebaseResponse.QUOTA_EXCEED
-                        is FirebaseNetworkException -> response.value  = FirebaseResponse.NO_INTERNET
-                        else -> response.value = FirebaseResponse.FAILURE_UNKNOWN
-                    }
+                    parseException(e, response)
                 }
 
                 override fun onCodeSent(vToken: String, p1: PhoneAuthProvider.ForceResendingToken) {
@@ -60,14 +56,18 @@ object AuthRepository {
         firebaseAuth.signInWithCredential(credential)
             .addOnSuccessListener { response.value = FirebaseResponse.SUCCESS }
             .addOnFailureListener{ exception ->
-                Timber.d("Verification exception: %s", exception.message?:"null message")
-                when (exception) {
-                    is FirebaseAuthInvalidCredentialsException -> response.value = FirebaseResponse.INVALID_CREDENTIALS
-                    is FirebaseTooManyRequestsException -> response.value  = FirebaseResponse.QUOTA_EXCEED
-                    is FirebaseNetworkException -> response.value  = FirebaseResponse.NO_INTERNET
-                    else -> response.value = FirebaseResponse.FAILURE_UNKNOWN
-                }
+                parseException(exception, response)
             }
         return response
+    }
+
+    private fun parseException(exception: Exception, response: MutableLiveData<FirebaseResponse>) {
+        Timber.d("putProfileDetails: Exception %s", exception.message?:"null message")
+        when (exception) {
+            is FirebaseAuthInvalidCredentialsException -> response.value = FirebaseResponse.INVALID_CREDENTIALS
+            is FirebaseTooManyRequestsException -> response.value  = FirebaseResponse.QUOTA_EXCEED
+            is FirebaseNetworkException -> response.value  = FirebaseResponse.NO_INTERNET
+            else -> response.value = FirebaseResponse.FAILURE_UNKNOWN
+        }
     }
 }

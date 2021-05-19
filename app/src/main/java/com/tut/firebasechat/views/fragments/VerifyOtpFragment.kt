@@ -7,14 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.NavHostFragment
 import com.tut.firebasechat.R
 import com.tut.firebasechat.databinding.FragmentVerifyOtpBinding
 import com.tut.firebasechat.models.FirebaseResponse
-import com.tut.firebasechat.utilities.ViewUtility
 import com.tut.firebasechat.utilities.ViewUtility.showSnack
 import com.tut.firebasechat.viewmodels.AuthViewModel
-import com.tut.firebasechat.views.activities.HomeActivity
+import com.tut.firebasechat.views.activities.RegistrationActivity
 
 
 class VerifyOtpFragment : Fragment() {
@@ -65,7 +63,7 @@ class VerifyOtpFragment : Fragment() {
     }
 
     private fun intentHome() {
-        Intent(requireActivity(), HomeActivity::class.java).apply {
+        Intent(requireActivity(), RegistrationActivity::class.java).apply {
             startActivity(this)
             requireActivity().finish()
         }

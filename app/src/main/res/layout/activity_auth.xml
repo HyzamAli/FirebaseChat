@@ -7,6 +7,7 @@
     tools:context=".views.activities.AuthActivity">
 
     <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/nav_host_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:name="androidx.navigation.fragment.NavHostFragment"

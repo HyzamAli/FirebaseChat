@@ -5,4 +5,12 @@
     <string name="text_continue">Continue</string>
     <string name="hint_otp_here">OTP here</string>
     <string name="text_invalid_phone">Enter Valid Phone number</string>
+
+    <!-- Offline Store -->
+    <string name="STORE">STORE</string>
+    <string name="KEY_PROFILE_UPDATED">KEY_PROFILE_UPDATED</string>
+
+    <!-- Fire Store -->
+    <string name="COLLECTION_USERS">Users</string>
+    <string name="hint_name">Name</string>
 </resources>
