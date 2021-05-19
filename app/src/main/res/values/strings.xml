@@ -12,4 +12,5 @@
 
     <!-- Fire Store -->
     <string name="COLLECTION_USERS">Users</string>
+    <string name="hint_name">Name</string>
 </resources>
