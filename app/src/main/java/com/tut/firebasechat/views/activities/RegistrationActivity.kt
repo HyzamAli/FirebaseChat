@@ -18,16 +18,16 @@ class RegistrationActivity : AppCompatActivity() {
         setContentView(binding.root)
         viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
         if (viewModel.isProfileCompleted()) intentHome()
-        binding.nameContainer.setOnClickListener{putProfileDetails()}
+        binding.buttonSubmit.setOnClickListener{putProfileDetails()}
     }
 
     private fun putProfileDetails() {
         val name = binding.nameField.text.toString()
-        binding.buttonSubmit.isEnabled = false
         if (name.length<3){
             ViewUtility.showSnack(this, "Enter Valid Name")
             return
         }
+        binding.buttonSubmit.isEnabled = false
         viewModel.putProfileDetails(name).observe(this) { response ->
             binding.buttonSubmit.isEnabled = true
             when(response) {
