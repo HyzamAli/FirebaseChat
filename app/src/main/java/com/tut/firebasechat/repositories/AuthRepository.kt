@@ -18,6 +18,8 @@ object AuthRepository {
         Timber.plant(Timber.DebugTree())
     }
 
+    fun getFirebaseUser(): FirebaseUser? = firebaseAuth.currentUser
+
     fun isUserSignedIn():Boolean = (firebaseAuth.currentUser != null)
 
     fun signOutUser() = firebaseAuth.signOut()
