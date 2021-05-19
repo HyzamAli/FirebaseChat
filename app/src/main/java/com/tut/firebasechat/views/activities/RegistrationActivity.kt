@@ -16,9 +16,19 @@ class RegistrationActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityRegistrationBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         viewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
-        if (viewModel.isProfileCompleted()) intentHome()
         binding.buttonSubmit.setOnClickListener{putProfileDetails()}
+
+        isProfileExists()
+    }
+
+    private fun isProfileExists() {
+        viewModel.isProfileExists().observe(this) { responseWrapper ->
+            if (responseWrapper.response == FirebaseResponse.SUCCESS) {
+                if (viewModel.isProfileCompleted()) intentHome()
+            } else ViewUtility.showSnack(this, "Error, try later")
+        }
     }
 
     private fun putProfileDetails() {

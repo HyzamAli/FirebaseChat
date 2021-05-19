@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import com.tut.firebasechat.R
 import com.tut.firebasechat.models.FirebaseResponse
+import com.tut.firebasechat.models.ResponseWrapper
 import com.tut.firebasechat.models.User
 import com.tut.firebasechat.repositories.AuthRepository
 import com.tut.firebasechat.repositories.ProfileRepository
@@ -29,12 +30,22 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         return response
     }
 
+    fun isProfileExists(): LiveData<ResponseWrapper<Boolean>> {
+        val response: MediatorLiveData<ResponseWrapper<Boolean>> = MediatorLiveData()
+        response.addSource(repository.isProfileExists()) { responseWrapper ->
+            if (responseWrapper.response == FirebaseResponse.SUCCESS &&
+                responseWrapper.data == true) putProfileCompleted()
+            response.value = responseWrapper
+        }
+        return response
+    }
+
     fun isProfileCompleted(): Boolean =
             getStore().getBoolean(app.getString(R.string.KEY_PROFILE_UPDATED), false)
 
     private fun putProfileCompleted() =
             getStore().edit().apply {
-                this.putBoolean(app.getString(R.string.KEY_PROFILE_UPDATED), true)
+                this.putBoolean(app.getString(R.string.KEY_PROFILE_UPDATED), true).apply()
             }
 
     private fun getStore(): SharedPreferences =
