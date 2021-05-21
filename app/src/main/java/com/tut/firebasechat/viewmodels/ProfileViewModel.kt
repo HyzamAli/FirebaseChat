@@ -22,10 +22,10 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         AuthRepository.getFirebaseUser().apply{ if (this != null) user =
             User(name = name,phone =  this.phoneNumber!!) }
         response.addSource(repository.putProfileDetails(user)){ repositoryResponse ->
-            if (repositoryResponse == FirebaseResponse.SUCCESS) {
+            if (repositoryResponse.response == FirebaseResponse.SUCCESS) {
                 putProfileCompleted()
             }
-            response.value = repositoryResponse
+            response.value = repositoryResponse.response
         }
         return response
     }
