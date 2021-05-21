@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.tut.firebasechat.models.FirebaseResponse
@@ -17,6 +18,8 @@ object ProfileRepository {
         .getInstance()
         .collection("Users")
         .document(firebaseAuth.currentUser!!.uid)
+    private val usersReference: CollectionReference =
+            FirebaseFirestore.getInstance().collection("Users")
 
     init {
         Timber.plant(Timber.DebugTree())
@@ -30,30 +33,43 @@ object ProfileRepository {
                 else ResponseWrapper(FirebaseResponse.SUCCESS, false)
             }
             .addOnFailureListener{ exception ->
-                when (exception) {
-                    is FirebaseNetworkException -> response.value = ResponseWrapper(FirebaseResponse.NO_INTERNET)
-                    else -> response.value = ResponseWrapper(FirebaseResponse.FAILURE_UNKNOWN)
-                }
+                parseException(exception, response)
             }
         return response
     }
 
-    fun putProfileDetails(user: User?): LiveData<FirebaseResponse> {
-        val response: MutableLiveData<FirebaseResponse> = MutableLiveData()
-        if (user == null) response.value = FirebaseResponse.INVALID_CREDENTIALS
+    fun getProfile(uid: String): LiveData<ResponseWrapper<User>> {
+        val response: MutableLiveData<ResponseWrapper<User>> = MutableLiveData()
+        usersReference.document(uid)
+                .get()
+                .addOnSuccessListener { result ->
+                    if (result.exists()) {
+                        response.value = ResponseWrapper(FirebaseResponse.SUCCESS, result.toObject(User::class.java))
+                    } else {
+                        response.value = ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS)
+                    }
+                }.addOnFailureListener{ exception ->
+                    parseException(exception, response)
+                }
+        return response
+    }
+
+    fun putProfileDetails(user: User?): LiveData<ResponseWrapper<FirebaseResponse>> {
+        val response: MutableLiveData<ResponseWrapper<FirebaseResponse>> = MutableLiveData()
+        if (user == null) response.value = ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS)
         else {
             reference.set(user)
-                .addOnSuccessListener { response.value = FirebaseResponse.SUCCESS }
+                .addOnSuccessListener { response.value = ResponseWrapper(FirebaseResponse.SUCCESS) }
                 .addOnFailureListener { exception -> parseException(exception, response) }
         }
         return response
     }
 
-    private fun parseException(exception: Exception, response: MutableLiveData<FirebaseResponse>) {
+    private fun <T: Any> parseException(exception: Exception, response: MutableLiveData<ResponseWrapper<T>>) {
         Timber.d("putProfileDetails: Exception %s", exception.message?:"null message")
         when (exception) {
-            is FirebaseNetworkException -> response.value = FirebaseResponse.NO_INTERNET
-            else -> response.value = FirebaseResponse.FAILURE_UNKNOWN
+            is FirebaseNetworkException -> response.value = ResponseWrapper(FirebaseResponse.NO_INTERNET)
+            else -> response.value = ResponseWrapper(FirebaseResponse.FAILURE_UNKNOWN)
         }
     }
 }
