@@ -2,7 +2,6 @@ package com.tut.firebasechat.views.fragments
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,7 +14,7 @@ import com.tut.firebasechat.viewmodels.AuthViewModel
 import com.tut.firebasechat.views.activities.RegistrationActivity
 
 
-class VerifyOtpFragment : Fragment() {
+class VerifyOtpFragment : BaseFragment() {
     private lateinit var binding: FragmentVerifyOtpBinding
     private lateinit var viewModel: AuthViewModel
 
@@ -47,18 +46,8 @@ class VerifyOtpFragment : Fragment() {
         binding.buttonSubmit.isEnabled = false
         viewModel.verifyOTP(code).observe(viewLifecycleOwner) { response ->
             binding.buttonSubmit.isEnabled = true
-            when(response) {
-                FirebaseResponse.SUCCESS -> intentHome()
-                FirebaseResponse.NO_INTERNET -> showSnack(
-                    requireActivity(),
-                    "NO INTERNET"
-                )
-                FirebaseResponse.INVALID_CREDENTIALS -> showSnack(
-                    requireActivity(),
-                    "Invalid OTP Code"
-                )
-                else -> showSnack(requireActivity(), "Try Later")
-            }
+            if (response ==  FirebaseResponse.SUCCESS) intentHome()
+            else handleError(response)
         }
     }
 

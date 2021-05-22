@@ -1,7 +1,6 @@
 package com.tut.firebasechat.views.fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +13,7 @@ import com.tut.firebasechat.utilities.ViewUtility.showSnack
 import com.tut.firebasechat.viewmodels.AuthViewModel
 
 
-class RequestOtpFragment : Fragment() {
+class RequestOtpFragment : BaseFragment() {
     private lateinit var binding: FragmentRequestOtpBinding
     private lateinit var viewModel: AuthViewModel
 
@@ -48,13 +47,11 @@ class RequestOtpFragment : Fragment() {
         binding.buttonSubmit.isEnabled = false
         viewModel.requestOTP(phone, requireActivity()).observe(viewLifecycleOwner) { response ->
             binding.buttonSubmit.isEnabled = true
-            when(response) {
+            when (response) {
                 FirebaseResponse.SUCCESS -> showSnack(requireActivity(), "SUCCESS")
-                FirebaseResponse.NO_INTERNET -> showSnack(requireActivity(), "NO INTERNET")
-                FirebaseResponse.INVALID_CREDENTIALS -> showSnack(requireActivity(), "Invalid Phone number")
-                FirebaseResponse.CODE_SENT -> NavHostFragment.findNavController(this).navigate(R.id.requestToVerify)
-                FirebaseResponse.QUOTA_EXCEED -> showSnack(requireActivity(), "Quota Exceeded")
-                else -> showSnack(requireActivity(), "Try Later")
+                FirebaseResponse.CODE_SENT -> NavHostFragment.findNavController(this)
+                    .navigate(R.id.requestToVerify)
+                else -> handleError(response)
             }
         }
     }
