@@ -4,6 +4,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.PropertyName
+import com.tut.firebasechat.utilities.DateUtility
 
 data class Chat(
 
@@ -18,5 +19,8 @@ data class Chat(
         val receiver: String="",
 
         @PropertyName("time_stamp")
-        val timestamp: Timestamp = Timestamp.now()
-)
+        val time_stamp: Timestamp = Timestamp.now()
+) {
+        val getTimeAsString: String
+        get() = DateUtility.getFormattedTimeStamp(time_stamp)
+}

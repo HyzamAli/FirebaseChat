@@ -15,7 +15,7 @@ data class Message(
         val sender: String="",
 
         @PropertyName("time_stamp")
-        val timeStamp: Timestamp = Timestamp.now(),
+        val time_stamp: Timestamp = Timestamp.now(),
 
         @PropertyName("message")
         val content: String
