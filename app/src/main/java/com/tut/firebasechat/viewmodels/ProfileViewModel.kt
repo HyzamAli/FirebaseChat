@@ -20,12 +20,12 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     fun putProfileDetails(name: String): LiveData<FirebaseResponse> {
         val response: MediatorLiveData<FirebaseResponse> = MediatorLiveData()
         AuthRepository.getFirebaseUser().apply{ if (this != null) user =
-            User(this.uid, name, this.phoneNumber!!) }
+            User(name = name,phone =  this.phoneNumber!!) }
         response.addSource(repository.putProfileDetails(user)){ repositoryResponse ->
-            if (repositoryResponse == FirebaseResponse.SUCCESS) {
+            if (repositoryResponse.response == FirebaseResponse.SUCCESS) {
                 putProfileCompleted()
             }
-            response.value = repositoryResponse
+            response.value = repositoryResponse.response
         }
         return response
     }

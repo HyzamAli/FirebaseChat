@@ -1,12 +1,18 @@
 package com.tut.firebasechat.models
 
-import com.google.gson.annotations.SerializedName
+import com.google.firebase.firestore.DocumentId
+import com.google.firebase.firestore.Exclude
+import com.google.firebase.firestore.PropertyName
 
 data class User(
-    @SerializedName("uid")
-    val uid: String,
-    @SerializedName("name")
-    val name: String,
-    @SerializedName("phone")
-    val phone: String
+
+    @DocumentId
+    @Exclude
+    val id: String="",
+
+    @PropertyName("name")
+    val name: String="",
+
+    @PropertyName("phone")
+    val phone: String=""
 )
