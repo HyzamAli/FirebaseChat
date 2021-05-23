@@ -14,9 +14,6 @@ import java.util.concurrent.TimeUnit
 object AuthRepository {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private var verificationToken: String = ""
-    init {
-        Timber.plant(Timber.DebugTree())
-    }
 
     fun getFirebaseUser(): FirebaseUser? = firebaseAuth.currentUser
 
