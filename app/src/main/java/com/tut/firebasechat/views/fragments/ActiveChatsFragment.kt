@@ -9,6 +9,7 @@ import com.tut.firebasechat.databinding.FragmentActiveChatsBinding
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.viewmodels.ChatViewModel
 import com.tut.firebasechat.views.adapters.ActiveChatListAdapter
+import timber.log.Timber
 
 
 class ActiveChatsFragment : BaseFragment() {
@@ -22,19 +23,31 @@ class ActiveChatsFragment : BaseFragment() {
 
         binding = FragmentActiveChatsBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(this).get(ChatViewModel::class.java)
+        //Timber.plant(Timber.DebugTree())
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         adapter = ActiveChatListAdapter()
         binding.usersList.adapter = adapter
-        getChats()
+        observeChats()
+        observeResponses()
     }
 
-    private fun getChats() {
-        viewModel.getChats().observe(viewLifecycleOwner) { response ->
-            if (response == FirebaseResponse.SUCCESS) adapter.submitList(viewModel.chatManagers)
-            else handleError(response)
+    private fun observeChats() {
+        viewModel.chatManagers.observe(viewLifecycleOwner) { list ->
+            Timber.d("notified of list changes %d", list.size)
+            if (list.isNotEmpty()){
+                Timber.d("name  %s", list[0].user.name)
+                val newList = list.toList()
+                adapter.submitList(newList)
+            } }
+    }
+
+    private fun observeResponses() {
+        viewModel.response.observe(viewLifecycleOwner) {response ->
+            Timber.d("notified of response changes")
+            if (response!= FirebaseResponse.SUCCESS) handleError(response)
         }
     }
 }

@@ -10,6 +10,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.models.ResponseWrapper
 import com.tut.firebasechat.models.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 object ProfileRepository {
@@ -20,10 +23,7 @@ object ProfileRepository {
         .document(firebaseAuth.currentUser!!.uid)
     private val usersReference: CollectionReference =
             FirebaseFirestore.getInstance().collection("Users")
-
-    init {
-        Timber.plant(Timber.DebugTree())
-    }
+    private val defaultDispatcher = Dispatchers.IO
 
     fun isProfileExists(): LiveData<ResponseWrapper<Boolean>> {
         val response: MutableLiveData<ResponseWrapper<Boolean>> = MutableLiveData()
@@ -38,20 +38,19 @@ object ProfileRepository {
         return response
     }
 
-    fun getProfile(uid: String): LiveData<ResponseWrapper<User>> {
-        val response: MutableLiveData<ResponseWrapper<User>> = MutableLiveData()
+    suspend fun getProfile(uid: String): ResponseWrapper<User> = withContext(defaultDispatcher) {
+        var response: ResponseWrapper<User> = ResponseWrapper(FirebaseResponse.FAILURE_UNKNOWN)
         usersReference.document(uid)
-                .get()
-                .addOnSuccessListener { result ->
-                    if (result.exists()) {
-                        response.value = ResponseWrapper(FirebaseResponse.SUCCESS, result.toObject(User::class.java))
-                    } else {
-                        response.value = ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS)
-                    }
-                }.addOnFailureListener{ exception ->
-                    parseException(exception, response)
+            .get()
+            .addOnSuccessListener { result ->
+                response = if(result.exists()) {
+                    ResponseWrapper(FirebaseResponse.SUCCESS, result.toObject(User::class.java))
                 }
-        return response
+                else ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS)
+            }
+            .addOnFailureListener{exception -> response = parseException(exception)}
+            .await()
+        response
     }
 
     fun putProfileDetails(user: User?): LiveData<ResponseWrapper<FirebaseResponse>> {
@@ -65,6 +64,16 @@ object ProfileRepository {
         return response
     }
 
+    private fun <T> parseException(exception: Exception): ResponseWrapper<T>{
+        Timber.d("putProfileDetails: Exception %s", exception.message?:"null message")
+        return when(exception) {
+            is FirebaseNetworkException -> ResponseWrapper(FirebaseResponse.NO_INTERNET)
+            else -> ResponseWrapper(FirebaseResponse.FAILURE_UNKNOWN)
+        }
+    }
+
+
+    @Deprecated("User new parse exception")
     private fun <T: Any> parseException(exception: Exception, response: MutableLiveData<ResponseWrapper<T>>) {
         Timber.d("putProfileDetails: Exception %s", exception.message?:"null message")
         when (exception) {
