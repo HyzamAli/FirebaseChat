@@ -6,7 +6,8 @@ import com.tut.firebasechat.repositories.AuthRepository
 import com.tut.firebasechat.repositories.ChatRepository
 import com.tut.firebasechat.repositories.ProfileRepository
 import kotlinx.coroutines.*
-import org.jetbrains.annotations.TestOnly
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
 import timber.log.Timber
 
 class ChatViewModel: ViewModel() {
@@ -20,6 +21,8 @@ class ChatViewModel: ViewModel() {
 
     private val _response: MutableLiveData<FirebaseResponse> = MutableLiveData()
 
+    private val userSet: HashSet<String> = HashSet()
+
     val response: LiveData<FirebaseResponse>
     get() = _response
 
@@ -30,48 +33,62 @@ class ChatViewModel: ViewModel() {
 
     private fun getChats() = viewModelScope.launch {
         Timber.d("Trying to get chats")
-        val responseWrapper = repository.getChats()
-        if (responseWrapper.response == FirebaseResponse.SUCCESS) {
-            Timber.d("received chats successfully")
-            getChatManagers(responseWrapper.data!!).invokeOnCompletion {
-                Timber.d("All done, chat managers size %d", chatManagers.value!!.size)
+        repository.getChats()
+            .catch { _response.postValue(FirebaseResponse.FAILURE_UNKNOWN)}
+            .collect { responseWrapper ->
+                Timber.d("Data change notified from firebase")
+                if (responseWrapper.response == FirebaseResponse.SUCCESS) {
+                    getChatManagers(responseWrapper.data)
+                } else {
+                    Timber.d("Error retrieving changes from firebase")
+                    _response.postValue(FirebaseResponse.FAILURE_UNKNOWN)
+                    this.cancel()
+                }
             }
-        } else {
-            _response.postValue(responseWrapper.response)
-            this.cancel()
+    }
+
+    private fun getChatManagers(chats: List<Chat>?) = viewModelScope.launch {
+        if (chats == null) this.cancel()
+        Timber.d("chats size: %s, now trying to get users", chats?.size)
+        chats?.forEach { chat ->
+            val secondPartyUid =
+                if (chat.sender == currentUser) chat.receiver else chat.sender
+            val status = chat.chatStatus
+            if (status == STATUS.ADDED) {
+                val responseWrapper = ProfileRepository.getProfile(secondPartyUid)
+                if (responseWrapper.response == FirebaseResponse.SUCCESS) {
+                    responseWrapper.data?.let {
+                        userSet.add(it.id)
+                        Timber.d("received user successfully")
+                        chatManagers.value?.add(0, ChatManager(responseWrapper.data, chat))
+                        Timber.d("chat managers size: %s", chatManagers.value!!.size)
+                        chatManagers.notifyObserverFromThread()
+                    }
+                } else {
+                    _response.postValue(responseWrapper.response)
+                    this.cancel()
+                }
+            } else if (status == STATUS.MODIFIED){
+                Timber.d("user already present modifying list")
+                chatManagers.value?.let {
+                    val oldIndex = getIndexByUser(secondPartyUid)
+                    val oldUser = it[oldIndex].user
+                    it.removeAt(oldIndex)
+                    it.add(0, ChatManager(oldUser, chat))
+                    chatManagers.notifyObserverFromThread()
+                }
+            } /** To Add provision for chat deletion here */
         }
     }
 
-    private fun getChatManagers(chats: List<Chat>) = viewModelScope.launch {
-        Timber.d("chats size: %s, now trying to get users", chats.size)
-        chats.forEach { chat ->
-            val secondPartyUid =
-                if (chat.sender == currentUser) chat.receiver else chat.sender
-            val responseWrapper = ProfileRepository.getProfile(secondPartyUid)
-            if (responseWrapper.response == FirebaseResponse.SUCCESS) {
-                Timber.d("received user successfully")
-                chatManagers.value?.add(ChatManager(responseWrapper.data!!, chat))
-                Timber.d("chat managers size: %s", chatManagers.value!!.size)
-                chatManagers.notifyObserverFromThread()
-            } else {
-                _response.postValue(responseWrapper.response)
-                this.cancel()
-            }
+    private fun getIndexByUser(userId: String): Int {
+        chatManagers.value?.forEachIndexed { i,chatManager ->
+            if (chatManager.user.id == userId) return i
         }
+        return -1
     }
 
     private fun <T> MutableLiveData<T>.notifyObserverFromThread() {
         this.postValue(this.value)
-    }
-
-    @TestOnly
-    private fun testDelayAndAdd() = viewModelScope.launch {
-        delay(7000)
-        val user = User("fdfsdfs","David","+918238907122")
-        val chat = Chat("fasdfas","sfsf","fdsfdfdw")
-        val chatManager1 = ChatManager(user, chat)
-        chatManagers.value?.add(chatManager1)
-        chatManagers.notifyObserverFromThread()
-        Timber.d("added a new item to list and callback notifier")
     }
 }

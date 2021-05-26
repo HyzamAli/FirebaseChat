@@ -34,7 +34,8 @@ class ActiveChatListAdapter() :
          * point to the latest message and the timestamp
          */
         override fun areContentsTheSame(oldItem: ChatManager, newItem: ChatManager): Boolean {
-            return oldItem.user.id == newItem.user.id
+            return oldItem.user.name == newItem.user.name &&
+                    oldItem.chat.time_stamp == newItem.chat.time_stamp
         }
 
     }
