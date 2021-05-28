@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.tut.firebasechat.databinding.RowActiveChatsBinding
 import com.tut.firebasechat.models.ChatManager
 
-class ActiveChatListAdapter() :
+class ActiveChatListAdapter(private val listener: ChatClickListener) :
     ListAdapter<ChatManager, ActiveChatListAdapter.ViewHolder>(ChatManagerDiffCallBack()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -20,6 +20,7 @@ class ActiveChatListAdapter() :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.binding.user = getItem(position).user
         holder.binding.chat = getItem(position).chat
+        holder.binding.root.setOnClickListener{listener.onChatClicked(getItem(position))}
     }
 
     class ViewHolder(val binding: RowActiveChatsBinding) : RecyclerView.ViewHolder(binding.root)
@@ -38,5 +39,9 @@ class ActiveChatListAdapter() :
                     oldItem.chat.time_stamp == newItem.chat.time_stamp
         }
 
+    }
+
+    interface ChatClickListener{
+        fun onChatClicked(chatManager: ChatManager)
     }
 }

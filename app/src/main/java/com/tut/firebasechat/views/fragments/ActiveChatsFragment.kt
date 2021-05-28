@@ -5,14 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.NavHostFragment
 import com.tut.firebasechat.databinding.FragmentActiveChatsBinding
+import com.tut.firebasechat.models.ChatManager
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.viewmodels.ChatViewModel
 import com.tut.firebasechat.views.adapters.ActiveChatListAdapter
-import timber.log.Timber
 
 
-class ActiveChatsFragment : BaseFragment() {
+class ActiveChatsFragment : BaseFragment(), ActiveChatListAdapter.ChatClickListener {
 
     private lateinit var binding: FragmentActiveChatsBinding
     private lateinit var viewModel: ChatViewModel
@@ -23,12 +24,11 @@ class ActiveChatsFragment : BaseFragment() {
 
         binding = FragmentActiveChatsBinding.inflate(inflater, container, false)
         viewModel = ViewModelProvider(this).get(ChatViewModel::class.java)
-        //Timber.plant(Timber.DebugTree())
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        adapter = ActiveChatListAdapter()
+        adapter = ActiveChatListAdapter(this)
         binding.usersList.adapter = adapter
         observeChats()
         observeResponses()
@@ -36,18 +36,21 @@ class ActiveChatsFragment : BaseFragment() {
 
     private fun observeChats() {
         viewModel.chatManagers.observe(viewLifecycleOwner) { list ->
-            Timber.d("notified of list changes %d", list.size)
             if (list.isNotEmpty()){
-                Timber.d("name  %s", list[0].user.name)
                 val newList = list.toList()
                 adapter.submitList(newList)
-            } }
+            }
+        }
     }
 
     private fun observeResponses() {
         viewModel.response.observe(viewLifecycleOwner) {response ->
-            Timber.d("notified of response changes")
             if (response!= FirebaseResponse.SUCCESS) handleError(response)
         }
+    }
+
+    override fun onChatClicked(chatManager: ChatManager) {
+        val action = ActiveChatsFragmentDirections.actionToMessages(chatManager.chat.docId)
+        NavHostFragment.findNavController(this).navigate(action)
     }
 }
