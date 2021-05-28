@@ -4,4 +4,6 @@
     <dimen name="material_padding_half">8dp</dimen>
     <dimen name="chat_offset">32dp</dimen>
     <dimen name="card_corner_radius">4dp</dimen>
+    <dimen name="chat_message_size">16sp</dimen>
+    <dimen name="chat_time_stamp_size">12sp</dimen>
 </resources>
