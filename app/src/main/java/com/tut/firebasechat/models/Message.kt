@@ -1,5 +1,6 @@
 package com.tut.firebasechat.models
 
+import androidx.recyclerview.widget.DiffUtil
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.Exclude
@@ -20,7 +21,17 @@ data class Message(
 
         @PropertyName("time_stamp")
         val time_stamp: Timestamp = Timestamp.now()
-) {
+
+) : DiffUtil.ItemCallback<Message>() {
+
         val getTimeAsString: String
         get() = DateUtility.getFormattedTimeStamp(time_stamp)
+
+        override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
+                return oldItem.docId == newItem.docId
+        }
+
+        override fun areContentsTheSame(oldItem: Message, newItem: Message): Boolean {
+                return oldItem == newItem
+        }
 }
