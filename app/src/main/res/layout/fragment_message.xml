@@ -6,11 +6,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".views.fragments.MessageFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/messages_list"
-        android:layout_height="match_parent"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        app:reverseLayout="true"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:orientation="vertical">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/messages_list"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                app:reverseLayout="true"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/live_messages_list"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                app:reverseLayout="true"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
 </FrameLayout>
