@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.tut.firebasechat.models.Message
+import com.tut.firebasechat.models.ResponseWrapper
 import com.tut.firebasechat.repositories.MessageRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -14,5 +15,9 @@ class MessageViewModel : ViewModel() {
     fun getPrevMessages(docId: String): Flow<PagingData<Message>> {
         return repository.getPrevMessages(docId)
                 .cachedIn(viewModelScope)
+    }
+
+    fun getLiveMessageStream(docId: String): Flow<ResponseWrapper<List<Message>>> {
+        return repository.getLiveMessageStream(docId)
     }
 }
