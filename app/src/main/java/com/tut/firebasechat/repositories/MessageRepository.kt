@@ -9,6 +9,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.Query
 import com.tut.firebasechat.models.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -62,7 +63,7 @@ object MessageRepository {
                 .document(messageDocId)
                 .collection(MESSAGE_COLLECTIONS)
                 .whereGreaterThanOrEqualTo(TIME_STAMP_FIELD, startTime)
-                .orderBy(TIME_STAMP_FIELD)
+                .orderBy(TIME_STAMP_FIELD,Query.Direction.DESCENDING)
                 .addSnapshotListener{snapshot, e ->
                     if (e != null) {
                         offer(parseException(e))
