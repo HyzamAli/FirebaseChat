@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.ConcatAdapter
+import androidx.recyclerview.widget.SnapHelper
 import com.tut.firebasechat.databinding.FragmentMessageBinding
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.models.Message
@@ -27,7 +29,8 @@ class MessageFragment : Fragment() {
     private lateinit var binding: FragmentMessageBinding
     private lateinit var viewModel: MessageViewModel
     private val args: MessageFragmentArgs by navArgs()
-    private lateinit var adapter: MessageListAdapter
+    private lateinit var adapter: ConcatAdapter
+    private lateinit var previousMessageAdapter: MessageListAdapter
     private lateinit var liveMessageAdapter: LiveMessageListAdapter
     private var jobGetPrevMessages: Job? = null
     private var jobGetLiveMessages: Job? = null
@@ -42,10 +45,10 @@ class MessageFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        adapter = MessageListAdapter()
+        previousMessageAdapter = MessageListAdapter()
         liveMessageAdapter = LiveMessageListAdapter()
-        binding.messagesList.adapter = adapter
-        binding.liveMessagesList.adapter = liveMessageAdapter
+        adapter = ConcatAdapter(listOf(liveMessageAdapter, previousMessageAdapter))
+        binding.recyclerList.adapter = adapter
         getPreviousMessages()
     }
 
@@ -57,7 +60,7 @@ class MessageFragment : Fragment() {
                         if (firstCollectionData) getLiveMessageStream().also {
                             firstCollectionData = false
                         }
-                        adapter.submitData(it)
+                        previousMessageAdapter.submitData(it)
                     }
         }
     }
@@ -73,6 +76,7 @@ class MessageFragment : Fragment() {
                                     list.addAll(liveMessageAdapter.currentList)
                                     withContext(Dispatchers.Main) {
                                         liveMessageAdapter.submitList(list.toList())
+                                        binding.recyclerList.smoothScrollToPosition(0)
                                     }
                                 }
                             }
