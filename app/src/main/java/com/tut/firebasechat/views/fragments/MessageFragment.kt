@@ -13,16 +13,14 @@ import androidx.recyclerview.widget.SnapHelper
 import com.tut.firebasechat.databinding.FragmentMessageBinding
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.models.Message
+import com.tut.firebasechat.utilities.ViewUtility
 import com.tut.firebasechat.viewmodels.MessageViewModel
 import com.tut.firebasechat.views.adapters.LiveMessageListAdapter
 import com.tut.firebasechat.views.adapters.MessageListAdapter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MessageFragment : Fragment() {
 
@@ -49,7 +47,20 @@ class MessageFragment : Fragment() {
         liveMessageAdapter = LiveMessageListAdapter()
         adapter = ConcatAdapter(listOf(liveMessageAdapter, previousMessageAdapter))
         binding.recyclerList.adapter = adapter
+        binding.btnSubmit.setOnClickListener { postMessage(binding.messageField.text.toString()) }
         getPreviousMessages()
+    }
+
+    private fun postMessage(content: String) {
+        if (content.isEmpty()) return
+        binding.messageField.setText("")
+        lifecycleScope.launch {
+            val response = viewModel.postMessage(args.messageId, content)
+            if (response != FirebaseResponse.SUCCESS) {
+                //TODO: proper error handling
+                ViewUtility.showSnack(requireActivity(),"Something failed")
+            }
+        }
     }
 
     private fun getPreviousMessages() {
@@ -75,8 +86,9 @@ class MessageFragment : Fragment() {
                                     val list: MutableList<Message> = it.toMutableList()
                                     list.addAll(liveMessageAdapter.currentList)
                                     withContext(Dispatchers.Main) {
-                                        liveMessageAdapter.submitList(list.toList())
-                                        binding.recyclerList.smoothScrollToPosition(0)
+                                        liveMessageAdapter.submitList(list.toList()) {
+                                            binding.recyclerList.smoothScrollToPosition(0)
+                                        }
                                     }
                                 }
                             }
