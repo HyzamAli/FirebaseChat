@@ -1,37 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
     tools:context=".views.fragments.MessageFragment">
 
-    <androidx.core.widget.NestedScrollView
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_list"
+        android:layout_height="0dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_weight="1"
+        app:reverseLayout="true"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="bottom"
-            android:orientation="vertical">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/messages_list"
-                android:layout_height="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="@dimen/material_padding_half">
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
+            app:hintEnabled="false">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/message_field"
                 android:layout_width="match_parent"
-                app:reverseLayout="true"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/live_messages_list"
                 android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                app:reverseLayout="true"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+                android:inputType="textMultiLine"
+                android:hint="@string/hint_type_message"/>
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_submit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_send"
+            android:contentDescription="@string/description_icon"
+            android:layout_marginStart="@dimen/material_padding_half"
+            app:tint="@color/white"/>
+    </LinearLayout>
 
-        </LinearLayout>
-
-    </androidx.core.widget.NestedScrollView>
-
-</FrameLayout>
+</LinearLayout>

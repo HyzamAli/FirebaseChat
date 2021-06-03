@@ -9,17 +9,22 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.Query
 import com.tut.firebasechat.models.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.lang.Exception
 
 object MessageRepository {
     private lateinit var startTime: Timestamp
 
+    private val defaultDispatcher = Dispatchers.IO
     fun getPrevMessages(messageDocId: String): Flow<PagingData<Message>> {
         startTime = Timestamp.now()
         return Pager(
@@ -31,6 +36,26 @@ object MessageRepository {
         ).flow
     }
 
+    suspend fun postMessage(messageDocId: String, message: Message): FirebaseResponse =
+            withContext(defaultDispatcher) {
+                var response = FirebaseResponse.SUCCESS
+                FirebaseFirestore.getInstance()
+                        .collection(CHAT_COLLECTIONS)
+                        .document(messageDocId)
+                        .collection(MESSAGE_COLLECTIONS)
+                        .add(message)
+                        .addOnFailureListener{exception ->
+                            response =when(exception) {
+                                is FirebaseNetworkException -> FirebaseResponse.NO_INTERNET
+                                is FirebaseFirestore -> FirebaseResponse.FIRE_STORE_EXCEPTION
+                                else -> FirebaseResponse.FAILURE_UNKNOWN
+                            }
+                        }
+                        .await()
+
+                response
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getLiveMessageStream(messageDocId: String) = callbackFlow {
         val subscription = FirebaseFirestore.getInstance()
@@ -38,7 +63,7 @@ object MessageRepository {
                 .document(messageDocId)
                 .collection(MESSAGE_COLLECTIONS)
                 .whereGreaterThanOrEqualTo(TIME_STAMP_FIELD, startTime)
-                .orderBy(TIME_STAMP_FIELD)
+                .orderBy(TIME_STAMP_FIELD,Query.Direction.DESCENDING)
                 .addSnapshotListener{snapshot, e ->
                     if (e != null) {
                         offer(parseException(e))
