@@ -14,8 +14,6 @@ class ChatViewModel: ViewModel() {
 
     private val repository = ChatRepository
 
-    private val currentUser = AuthRepository.getFirebaseUser()!!.uid
-
     val chatManagers: MutableLiveData<MutableList<ChatManager>> =
         MutableLiveData(mutableListOf())
 
@@ -51,11 +49,9 @@ class ChatViewModel: ViewModel() {
         if (chats == null) this.cancel()
         Timber.d("chats size: %s, now trying to get users", chats?.size)
         chats?.forEach { chat ->
-            val secondPartyUid =
-                if (chat.sender == currentUser) chat.receiver else chat.sender
             val status = chat.chatStatus
             if (status == STATUS.ADDED) {
-                val responseWrapper = ProfileRepository.getProfile(secondPartyUid)
+                val responseWrapper = ProfileRepository.getProfile(chat.party_id)
                 if (responseWrapper.response == FirebaseResponse.SUCCESS) {
                     responseWrapper.data?.let {
                         userSet.add(it.id)
@@ -71,7 +67,7 @@ class ChatViewModel: ViewModel() {
             } else if (status == STATUS.MODIFIED){
                 Timber.d("user already present modifying list")
                 chatManagers.value?.let {
-                    val oldIndex = getIndexByUser(secondPartyUid)
+                    val oldIndex = getIndexByUser(chat.party_id)
                     val oldUser = it[oldIndex].user
                     it.removeAt(oldIndex)
                     it.add(0, ChatManager(oldUser, chat))
