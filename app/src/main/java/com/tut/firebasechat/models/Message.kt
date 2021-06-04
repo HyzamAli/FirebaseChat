@@ -24,8 +24,7 @@ data class Message(
 
 ) : DiffUtil.ItemCallback<Message>() {
 
-        val getTimeAsString: String
-        get() = DateUtility.getFormattedTimeStamp(time_stamp)
+        fun getTimeAsString(): String = DateUtility.getFormattedTimeStamp(time_stamp)
 
         override fun areItemsTheSame(oldItem: Message, newItem: Message): Boolean {
                 return oldItem.docId == newItem.docId
