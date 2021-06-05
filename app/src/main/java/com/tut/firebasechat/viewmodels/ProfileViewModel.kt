@@ -5,12 +5,16 @@ import android.content.SharedPreferences
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.tut.firebasechat.R
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.models.ResponseWrapper
 import com.tut.firebasechat.models.User
 import com.tut.firebasechat.repositories.AuthRepository
 import com.tut.firebasechat.repositories.ProfileRepository
+import kotlinx.coroutines.flow.Flow
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = ProfileRepository
@@ -28,6 +32,11 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             response.value = repositoryResponse.response
         }
         return response
+    }
+
+    fun getProfilesByName(usernameQuery: String): Flow<PagingData<User>> {
+        return repository.getProfilesByName(usernameQuery)
+                .cachedIn(viewModelScope)
     }
 
     fun isProfileExists(): LiveData<ResponseWrapper<Boolean>> {
