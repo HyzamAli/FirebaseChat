@@ -31,5 +31,11 @@
         android:id="@+id/searchFragment"
         android:name="com.tut.firebasechat.views.fragments.SearchFragment"
         android:label="@string/search_title"
-        tools:layout="@layout/fragment_search" />
+        tools:layout="@layout/fragment_search" >
+        <action
+            android:id="@+id/action_searchToMessages"
+            app:destination="@id/messageFragment"
+            app:popUpTo="@id/searchFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
 </navigation>
