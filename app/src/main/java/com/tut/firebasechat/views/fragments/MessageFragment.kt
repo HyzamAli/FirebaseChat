@@ -7,9 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.ConcatAdapter
-import androidx.recyclerview.widget.SnapHelper
 import com.tut.firebasechat.databinding.FragmentMessageBinding
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.models.Message
@@ -38,6 +39,7 @@ class MessageFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentMessageBinding.inflate(inflater, container, false)
+        binding.toolbar.setupWithNavController(NavHostFragment.findNavController(this))
         viewModel = ViewModelProvider(requireActivity()).get(MessageViewModel::class.java)
         return binding.root
     }

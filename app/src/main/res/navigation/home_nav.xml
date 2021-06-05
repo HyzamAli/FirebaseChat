@@ -8,20 +8,28 @@
     <fragment
         android:id="@+id/activeChatsFragment"
         android:name="com.tut.firebasechat.views.fragments.ActiveChatsFragment"
-        android:label="fragment_active_chats"
+        android:label="@string/app_name"
         tools:layout="@layout/fragment_active_chats" >
         <action
             android:id="@+id/action_toMessages"
             app:destination="@id/messageFragment" />
+        <action
+            android:id="@+id/action_toSearchUser"
+            app:destination="@id/searchFragment" />
     </fragment>
     <fragment
         android:id="@+id/messageFragment"
         android:name="com.tut.firebasechat.views.fragments.MessageFragment"
-        android:label="fragment_message"
+        android:label="Chat"
         tools:layout="@layout/fragment_message" >
         <argument
             android:name="messageId"
             app:argType="string"
             android:defaultValue='""' />
     </fragment>
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.tut.firebasechat.views.fragments.SearchFragment"
+        android:label="@string/search_title"
+        tools:layout="@layout/fragment_search" />
 </navigation>
