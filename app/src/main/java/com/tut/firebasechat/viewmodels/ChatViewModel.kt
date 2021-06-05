@@ -19,7 +19,7 @@ class ChatViewModel: ViewModel() {
 
     private val _response: MutableLiveData<FirebaseResponse> = MutableLiveData()
 
-    private val userSet: HashSet<String> = HashSet()
+    val userSet: HashSet<String> = HashSet()
 
     val response: LiveData<FirebaseResponse>
     get() = _response
@@ -69,7 +69,7 @@ class ChatViewModel: ViewModel() {
                 chatManagers.value?.let {
                     val oldIndex = getIndexByUser(chat.party_id)
                     val oldUser = it[oldIndex].user
-                    it.removeAt(oldIndex)
+                    it.removeAt(oldIndex) // TODO: Add Thread Locking check SearchFragment.kt 82,83
                     it.add(0, ChatManager(oldUser, chat))
                     chatManagers.notifyObserverFromThread()
                 }
@@ -77,7 +77,7 @@ class ChatViewModel: ViewModel() {
         }
     }
 
-    private fun getIndexByUser(userId: String): Int {
+     fun getIndexByUser(userId: String): Int {
         chatManagers.value?.forEachIndexed { i,chatManager ->
             if (chatManager.user.id == userId) return i
         }
