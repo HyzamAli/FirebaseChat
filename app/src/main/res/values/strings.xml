@@ -13,4 +13,6 @@
     <string name="hint_name">Name</string>
     <string name="hint_type_message">Type Message</string>
     <string name="description_icon">icon</string>
+    <string name="search_title">Search</string>
+    <string name="hint_enter_name">Enter Name</string>
 </resources>
