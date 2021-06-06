@@ -4,12 +4,17 @@ import android.app.Activity
 import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 
 object ViewUtility {
     fun showSnack(activity: Activity, message:String, duration: Int = Snackbar.LENGTH_SHORT) {
         val rootView: View = activity.window.decorView.findViewById(android.R.id.content)
         Snackbar.make(rootView, message, duration).show()
+    }
+
+    fun showToast(context: Context, message:String, duration: Int = Toast.LENGTH_SHORT) {
+        Toast.makeText(context, message, duration).show()
     }
 
     fun hideKeyboard(activity: Activity) {

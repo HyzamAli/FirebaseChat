@@ -2,6 +2,9 @@ package com.tut.firebasechat.repositories
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
@@ -11,6 +14,7 @@ import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.models.ResponseWrapper
 import com.tut.firebasechat.models.User
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -52,6 +56,13 @@ object ProfileRepository {
             .await()
         response
     }
+
+    fun getProfilesByName(usernameQuery: String): Flow<PagingData<User>> = Pager(
+            config = PagingConfig(
+                    pageSize = USERS_PAGE_SIZE,
+                    enablePlaceholders = false
+            ), pagingSourceFactory = { UsersSource(usernameQuery) }
+    ).flow
 
     fun putProfileDetails(user: User?): LiveData<ResponseWrapper<FirebaseResponse>> {
         val response: MutableLiveData<ResponseWrapper<FirebaseResponse>> = MutableLiveData()

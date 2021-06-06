@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
+import com.tut.firebasechat.R
 import com.tut.firebasechat.databinding.FragmentActiveChatsBinding
 import com.tut.firebasechat.models.ChatManager
 import com.tut.firebasechat.models.FirebaseResponse
@@ -23,6 +26,9 @@ class ActiveChatsFragment : BaseFragment(), ActiveChatListAdapter.ChatClickListe
                               savedInstanceState: Bundle?): View {
 
         binding = FragmentActiveChatsBinding.inflate(inflater, container, false)
+        binding.toolbar.setupWithNavController(
+            navController = NavHostFragment.findNavController(this),
+            configuration = AppBarConfiguration(setOf(R.id.activeChatsFragment)))
         viewModel = ViewModelProvider(this).get(ChatViewModel::class.java)
         return binding.root
     }
@@ -30,6 +36,11 @@ class ActiveChatsFragment : BaseFragment(), ActiveChatListAdapter.ChatClickListe
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         adapter = ActiveChatListAdapter(this)
         binding.usersList.adapter = adapter
+        binding.btnSearch.setOnClickListener {
+            ActiveChatsFragmentDirections.actionToSearchUser().also {
+                NavHostFragment.findNavController(this).navigate(it)
+            }
+        }
         observeChats()
         observeResponses()
     }

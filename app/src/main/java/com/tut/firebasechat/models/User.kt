@@ -1,5 +1,6 @@
 package com.tut.firebasechat.models
 
+import androidx.recyclerview.widget.DiffUtil
 import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.PropertyName
@@ -15,4 +16,11 @@ data class User(
 
     @PropertyName("phone")
     val phone: String=""
-)
+
+) : DiffUtil.ItemCallback<User>() {
+    override fun areItemsTheSame(oldItem: User, newItem: User): Boolean =
+            oldItem.id == newItem.id
+
+    override fun areContentsTheSame(oldItem: User, newItem: User): Boolean =
+        oldItem.name == newItem.name && oldItem.phone == newItem.phone
+}

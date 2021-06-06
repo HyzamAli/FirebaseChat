@@ -14,14 +14,12 @@ class ChatViewModel: ViewModel() {
 
     private val repository = ChatRepository
 
-    private val currentUser = AuthRepository.getFirebaseUser()!!.uid
-
     val chatManagers: MutableLiveData<MutableList<ChatManager>> =
         MutableLiveData(mutableListOf())
 
     private val _response: MutableLiveData<FirebaseResponse> = MutableLiveData()
 
-    private val userSet: HashSet<String> = HashSet()
+    val userSet: HashSet<String> = HashSet()
 
     val response: LiveData<FirebaseResponse>
     get() = _response
@@ -51,11 +49,9 @@ class ChatViewModel: ViewModel() {
         if (chats == null) this.cancel()
         Timber.d("chats size: %s, now trying to get users", chats?.size)
         chats?.forEach { chat ->
-            val secondPartyUid =
-                if (chat.sender == currentUser) chat.receiver else chat.sender
             val status = chat.chatStatus
             if (status == STATUS.ADDED) {
-                val responseWrapper = ProfileRepository.getProfile(secondPartyUid)
+                val responseWrapper = ProfileRepository.getProfile(chat.party_id)
                 if (responseWrapper.response == FirebaseResponse.SUCCESS) {
                     responseWrapper.data?.let {
                         userSet.add(it.id)
@@ -71,9 +67,9 @@ class ChatViewModel: ViewModel() {
             } else if (status == STATUS.MODIFIED){
                 Timber.d("user already present modifying list")
                 chatManagers.value?.let {
-                    val oldIndex = getIndexByUser(secondPartyUid)
+                    val oldIndex = getIndexByUser(chat.party_id)
                     val oldUser = it[oldIndex].user
-                    it.removeAt(oldIndex)
+                    it.removeAt(oldIndex) // TODO: Add Thread Locking check SearchFragment.kt 82,83
                     it.add(0, ChatManager(oldUser, chat))
                     chatManagers.notifyObserverFromThread()
                 }
@@ -81,7 +77,7 @@ class ChatViewModel: ViewModel() {
         }
     }
 
-    private fun getIndexByUser(userId: String): Int {
+     fun getIndexByUser(userId: String): Int {
         chatManagers.value?.forEachIndexed { i,chatManager ->
             if (chatManager.user.id == userId) return i
         }

@@ -20,8 +20,8 @@ data class Chat(
         @PropertyName("sender")
         val sender: String="",
 
-        @PropertyName("receiver")
-        val receiver: String="",
+        @PropertyName("party_id")
+        val party_id: String="",
 
 
         @PropertyName("time_stamp")
@@ -30,6 +30,5 @@ data class Chat(
         @Exclude
         var chatStatus: STATUS = STATUS.ADDED
 ) {
-        val getTimeAsString: String
-        get() = DateUtility.getFormattedTimeStamp(time_stamp)
+        fun getTimeAsString(): String = DateUtility.getFormattedTimeStamp(time_stamp)
 }
