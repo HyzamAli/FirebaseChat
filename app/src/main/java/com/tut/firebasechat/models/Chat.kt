@@ -27,6 +27,9 @@ data class Chat(
         @PropertyName("time_stamp")
         val time_stamp: Timestamp = Timestamp.now(),
 
+        @PropertyName("message")
+        val message: String = "",
+
         @Exclude
         var chatStatus: STATUS = STATUS.ADDED
 ) {

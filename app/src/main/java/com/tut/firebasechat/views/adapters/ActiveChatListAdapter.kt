@@ -30,13 +30,10 @@ class ActiveChatListAdapter(private val listener: ChatClickListener) :
             return oldItem.chat.docId == newItem.chat.docId
         }
 
-        /**
-         * When using live message updates in future chat screen, this should be UPDATED to
-         * point to the latest message and the timestamp
-         */
         override fun areContentsTheSame(oldItem: ChatManager, newItem: ChatManager): Boolean {
             return oldItem.user.name == newItem.user.name &&
-                    oldItem.chat.time_stamp == newItem.chat.time_stamp
+                    oldItem.chat.time_stamp == newItem.chat.time_stamp &&
+                    oldItem.chat.message == newItem.chat.message
         }
 
     }
