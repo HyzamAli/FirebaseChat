@@ -24,8 +24,9 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
     fun putProfileDetails(name: String): LiveData<FirebaseResponse> {
         val response: MediatorLiveData<FirebaseResponse> = MediatorLiveData()
+        val token = getStore().getString(app.getString(R.string.KEY_FCM_TOKEN), "")!!
         AuthRepository.getFirebaseUser().apply{ if (this != null) user =
-            User(name = name,phone =  this.phoneNumber!!) }
+            User(name = name,phone =  this.phoneNumber!!, token = token) }
         response.addSource(repository.putProfileDetails(user)){ repositoryResponse ->
             if (repositoryResponse.response == FirebaseResponse.SUCCESS) {
                 putProfileCompleted()
@@ -59,9 +60,7 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
             viewModelScope.launch {
                 val response = repository.putFcmToken(fcmToken!!)
                 if (response == FirebaseResponse.SUCCESS) {
-                    getStore().edit().apply {
-                        putBoolean(app.getString(R.string.KEY_FCM_UPDATED), true)
-                    }.apply()
+                    putProfileCompleted()
                 }
             }
         }
@@ -72,7 +71,9 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
     private fun putProfileCompleted() =
             getStore().edit().apply {
-                this.putBoolean(app.getString(R.string.KEY_PROFILE_UPDATED), true).apply()
+                this.putBoolean(app.getString(R.string.KEY_PROFILE_UPDATED), true)
+                this.putBoolean(app.getString(R.string.KEY_FCM_UPDATED), true)
+                this.apply()
             }
 
     private fun getStore(): SharedPreferences =

@@ -15,7 +15,10 @@ data class User(
     val name: String="",
 
     @PropertyName("phone")
-    val phone: String=""
+    val phone: String="",
+
+    @PropertyName("token")
+    val token: String=""
 
 ) : DiffUtil.ItemCallback<User>() {
     override fun areItemsTheSame(oldItem: User, newItem: User): Boolean =
