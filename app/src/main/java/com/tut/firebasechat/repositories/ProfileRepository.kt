@@ -83,6 +83,15 @@ object ProfileRepository {
         }
     }
 
+    suspend fun putFcmToken(token: String): FirebaseResponse {
+        var firebaseResponse = FirebaseResponse.SUCCESS
+        FirebaseFirestore.getInstance().collection("Users")
+            .document(firebaseAuth.currentUser!!.uid)
+            .update("token", token)
+            .addOnFailureListener{firebaseResponse = FirebaseResponse.FAILURE_UNKNOWN}
+            .await()
+        return firebaseResponse
+    }
 
     @Deprecated("User new parse exception")
     private fun <T: Any> parseException(exception: Exception, response: MutableLiveData<ResponseWrapper<T>>) {
