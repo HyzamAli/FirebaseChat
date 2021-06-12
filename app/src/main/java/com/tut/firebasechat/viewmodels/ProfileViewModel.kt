@@ -15,6 +15,7 @@ import com.tut.firebasechat.models.User
 import com.tut.firebasechat.repositories.AuthRepository
 import com.tut.firebasechat.repositories.ProfileRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = ProfileRepository
@@ -23,8 +24,9 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
 
     fun putProfileDetails(name: String): LiveData<FirebaseResponse> {
         val response: MediatorLiveData<FirebaseResponse> = MediatorLiveData()
+        val token = getStore().getString(app.getString(R.string.KEY_FCM_TOKEN), "")!!
         AuthRepository.getFirebaseUser().apply{ if (this != null) user =
-            User(name = name,phone =  this.phoneNumber!!) }
+            User(name = name,phone =  this.phoneNumber!!, token = token) }
         response.addSource(repository.putProfileDetails(user)){ repositoryResponse ->
             if (repositoryResponse.response == FirebaseResponse.SUCCESS) {
                 putProfileCompleted()
@@ -49,12 +51,29 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
         return response
     }
 
+    fun putFcmToken() {
+        val isFcmTokenUpdated =
+            getStore().getBoolean(app.getString(R.string.KEY_FCM_UPDATED), false)
+        val fcmToken =
+            getStore().getString(app.getString(R.string.KEY_FCM_TOKEN), "")
+        if (!isFcmTokenUpdated) {
+            viewModelScope.launch {
+                val response = repository.putFcmToken(fcmToken!!)
+                if (response == FirebaseResponse.SUCCESS) {
+                    putProfileCompleted()
+                }
+            }
+        }
+    }
+
     fun isProfileCompleted(): Boolean =
             getStore().getBoolean(app.getString(R.string.KEY_PROFILE_UPDATED), false)
 
     private fun putProfileCompleted() =
             getStore().edit().apply {
-                this.putBoolean(app.getString(R.string.KEY_PROFILE_UPDATED), true).apply()
+                this.putBoolean(app.getString(R.string.KEY_PROFILE_UPDATED), true)
+                this.putBoolean(app.getString(R.string.KEY_FCM_UPDATED), true)
+                this.apply()
             }
 
     private fun getStore(): SharedPreferences =

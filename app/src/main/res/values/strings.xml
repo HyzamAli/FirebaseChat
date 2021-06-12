@@ -9,6 +9,8 @@
     <!-- Offline Store -->
     <string name="STORE">STORE</string>
     <string name="KEY_PROFILE_UPDATED">KEY_PROFILE_UPDATED</string>
+    <string name="KEY_FCM_UPDATED">KEY_FCM_UPDATED</string>
+    <string name="KEY_FCM_TOKEN">KEY_FCM_TOKEN</string>
 
     <string name="hint_name">Name</string>
     <string name="hint_type_message">Type Message</string>
