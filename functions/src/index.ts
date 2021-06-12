@@ -1,5 +1,6 @@
 import {firestore, initializeApp} from "firebase-admin";
 import * as functions from "firebase-functions";
+import * as admin from "firebase-admin";
 initializeApp();
 
 export const newMessage = functions.firestore
@@ -32,10 +33,23 @@ export const newMessage = functions.firestore
       }
     });
 
-// // Start writing Firebase Functions
-// // https://firebase.google.com/docs/functions/typescript
-//
-// export const helloWorld = functions.https.onRequest((request, response) => {
-//   functions.logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+export const sendNotification = functions.firestore
+    .document("Users/{userId}/Chats/{chatId}")
+    .onWrite(async (change, ctx) => {
+      if (change.after.data()?.sender != ctx.params.userId) {
+        const senderSnapshot =
+        await firestore().doc(`Users/${change.after.data()?.sender}`).get();
+
+        const recieverSnapshot =
+        await firestore().doc(`Users/${ctx.params.userId}`).get();
+
+        const payload: admin.messaging.MessagingPayload = {
+          notification: {
+            title: senderSnapshot.data()?.name,
+            body: change.after.data()?.message,
+          },
+        };
+
+        admin.messaging().sendToDevice(recieverSnapshot.data()?.token, payload);
+      }
+    });
