@@ -17,4 +17,6 @@
     <string name="description_icon">icon</string>
     <string name="search_title">Search</string>
     <string name="hint_enter_name">Enter Name</string>
+    <string name="description_placeholder">placeholder</string>
+    <string name="hint_username">Username</string>
 </resources>
