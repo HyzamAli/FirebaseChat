@@ -17,6 +17,12 @@ data class User(
     @PropertyName("phone")
     val phone: String="",
 
+    @PropertyName("username")
+    val username: String="",
+
+    @PropertyName("dp_url")
+    val dp_url: String="",
+
     @PropertyName("token")
     val token: String=""
 
