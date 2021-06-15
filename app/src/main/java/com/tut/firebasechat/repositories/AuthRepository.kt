@@ -4,16 +4,17 @@ import android.app.Activity
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.FirebaseException
-import com.google.firebase.FirebaseNetworkException
-import com.google.firebase.FirebaseTooManyRequestsException
 import com.google.firebase.auth.*
 import com.tut.firebasechat.models.FirebaseResponse
-import timber.log.Timber
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 object AuthRepository {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private var verificationToken: String = ""
+    private val defaultDispatcher = Dispatchers.IO
 
     fun getFirebaseUser(): FirebaseUser? = firebaseAuth.currentUser
 
@@ -33,7 +34,7 @@ object AuthRepository {
                 }
 
                 override fun onVerificationFailed(e: FirebaseException) {
-                    parseException(e, response)
+                    response.value = ResponseParser.exceptionParser(e)
                 }
 
                 override fun onCodeSent(vToken: String, p1: PhoneAuthProvider.ForceResendingToken) {
@@ -46,25 +47,14 @@ object AuthRepository {
         return response
     }
 
-    fun verifyOTP(code: String): LiveData<FirebaseResponse> {
-        val response: MutableLiveData<FirebaseResponse> = MutableLiveData()
+    suspend fun verifyOTP(code: String) = withContext(defaultDispatcher) {
+        lateinit var response: FirebaseResponse
         val credential = PhoneAuthProvider.getCredential(verificationToken, code)
-
         firebaseAuth.signInWithCredential(credential)
-            .addOnSuccessListener { response.value = FirebaseResponse.SUCCESS }
+            .addOnSuccessListener { response = FirebaseResponse.SUCCESS }
             .addOnFailureListener{ exception ->
-                parseException(exception, response)
-            }
-        return response
-    }
-
-    private fun parseException(exception: Exception, response: MutableLiveData<FirebaseResponse>) {
-        Timber.d("putProfileDetails: Exception %s", exception.message?:"null message")
-        when (exception) {
-            is FirebaseAuthInvalidCredentialsException -> response.value = FirebaseResponse.INVALID_CREDENTIALS
-            is FirebaseTooManyRequestsException -> response.value  = FirebaseResponse.QUOTA_EXCEED
-            is FirebaseNetworkException -> response.value  = FirebaseResponse.NO_INTERNET
-            else -> response.value = FirebaseResponse.FAILURE_UNKNOWN
-        }
+                response = ResponseParser.exceptionParser(exception)
+            }.await()
+        response
     }
 }
