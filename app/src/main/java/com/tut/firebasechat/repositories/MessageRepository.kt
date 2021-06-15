@@ -57,12 +57,12 @@ object MessageRepository {
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getLiveMessageStream(messageDocId: String) = callbackFlow {
+    fun getLiveMessageStream(messageDocId: String, timeStamp: Timestamp? = null) = callbackFlow {
         val subscription = FirebaseFirestore.getInstance()
                 .collection(CHAT_COLLECTIONS)
                 .document(messageDocId)
                 .collection(MESSAGE_COLLECTIONS)
-                .whereGreaterThanOrEqualTo(TIME_STAMP_FIELD, startTime)
+                .whereGreaterThanOrEqualTo(TIME_STAMP_FIELD, timeStamp?:startTime)
                 .orderBy(TIME_STAMP_FIELD,Query.Direction.DESCENDING)
                 .addSnapshotListener{snapshot, e ->
                     if (e != null) {
