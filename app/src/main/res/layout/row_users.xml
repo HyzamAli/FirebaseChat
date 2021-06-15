@@ -16,13 +16,24 @@
         android:paddingEnd="@dimen/material_padding"
         android:layout_marginTop="@dimen/material_padding_half">
 
-        <TextView
-            android:id="@+id/name_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@{user.name}"
+        <ImageView
+            android:id="@+id/user_img"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
+            tools:src="@drawable/ic_avatar"
+            android:contentDescription="@string/description_icon"
+            profile_img="@{user.dp_url}"/>
+
+        <TextView
+            android:id="@+id/name_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{user.name}"
+            app:layout_constraintTop_toTopOf="@id/user_img"
+            app:layout_constraintStart_toEndOf="@id/user_img"
             android:maxLines="2"
             android:ellipsize="end"
             tools:text="User Name"/>
@@ -32,7 +43,7 @@
             android:layout_height="2dp"
             android:background="@android:color/darker_gray"
             android:layout_marginTop="@dimen/material_padding_half"
-            app:layout_constraintTop_toBottomOf="@id/name_text" />
+            app:layout_constraintTop_toBottomOf="@id/user_img" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
