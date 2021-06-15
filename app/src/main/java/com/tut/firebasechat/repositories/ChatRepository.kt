@@ -5,9 +5,12 @@ import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import com.tut.firebasechat.models.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 
@@ -18,11 +21,16 @@ const val TIME_STAMP_FIELD = "time_stamp"
 object ChatRepository {
 
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val defaultDispatcher = Dispatchers.IO
 
     private val chatReference: CollectionReference =
             FirebaseFirestore.getInstance()
                     .collection(USER_COLLECTIONS)
                     .document(firebaseAuth.uid?:"")
+                    .collection(CHAT_COLLECTIONS)
+
+    private val chatCollectionReference =
+            FirebaseFirestore.getInstance()
                     .collection(CHAT_COLLECTIONS)
 
     /**
@@ -64,6 +72,20 @@ object ChatRepository {
             }
         }
         awaitClose{subscription.remove()}
+    }
+
+    suspend fun createChat(user2: String) = withContext(defaultDispatcher) {
+        lateinit var response: ResponseWrapper<String>
+        val dataMap = mapOf(
+                "party_one" to  FirebaseAuth.getInstance().currentUser!!.uid,
+                "party_two" to user2
+        )
+        chatCollectionReference.add(dataMap)
+                .addOnSuccessListener { result ->
+                    response = ResponseWrapper(FirebaseResponse.SUCCESS, result.id)
+                }.addOnFailureListener { exception -> response = parseException(exception)
+                }.await()
+        response
     }
 
     private fun <T> parseException(exception: Exception): ResponseWrapper<T>{

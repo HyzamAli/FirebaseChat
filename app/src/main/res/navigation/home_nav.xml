@@ -25,7 +25,11 @@
         <argument
             android:name="messageId"
             app:argType="string"
-            android:defaultValue='""' />
+            android:defaultValue='' />
+        <argument
+            android:name="user2"
+            app:argType="string"
+            android:defaultValue='' />
     </fragment>
     <fragment
         android:id="@+id/searchFragment"

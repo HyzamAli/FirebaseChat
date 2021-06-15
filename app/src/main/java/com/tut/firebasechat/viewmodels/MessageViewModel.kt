@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.google.firebase.Timestamp
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.models.Message
 import com.tut.firebasechat.models.ResponseWrapper
@@ -21,8 +22,9 @@ class MessageViewModel : ViewModel() {
                 .cachedIn(viewModelScope)
     }
 
-    fun getLiveMessageStream(docId: String): Flow<ResponseWrapper<List<Message>>> {
-        return repository.getLiveMessageStream(docId)
+    fun getLiveMessageStream(docId: String, timestamp: Timestamp? = null):
+            Flow<ResponseWrapper<List<Message>>> {
+        return repository.getLiveMessageStream(docId, timestamp)
     }
 
     suspend fun postMessage(docId: String, content: String): FirebaseResponse {
