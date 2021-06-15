@@ -20,6 +20,17 @@
         android:paddingTop="@dimen/material_padding_half"
         android:paddingBottom="@dimen/material_padding_half">
 
+        <ImageView
+            android:id="@+id/user_img"
+            android:layout_width="65dp"
+            android:layout_height="65dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:src="@drawable/ic_avatar"
+            android:contentDescription="@string/description_icon"
+            profile_img="@{user.dp_url}"/>
+
         <TextView
             android:id="@+id/name_text"
             android:layout_width="wrap_content"
@@ -27,14 +38,14 @@
             android:maxLines="1"
             android:ellipsize="end"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/user_img"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
             tools:text="User Name"
             android:text="@{user.name}" />
 
         <TextView
             android:id="@+id/message_text"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="2"
             android:ellipsize="end"
@@ -42,6 +53,7 @@
             tools:text="Message Content"
             android:textSize="16sp"
             android:textColor="@android:color/black"
+            app:layout_constraintStart_toStartOf="@id/name_text"
             app:layout_constraintTop_toBottomOf="@id/name_text"/>
 
         <TextView
@@ -50,7 +62,7 @@
             android:layout_height="wrap_content"
             android:maxLines="1"
             android:ellipsize="end"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="@id/name_text"
             android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1"
             tools:text="12:10 AM Mon"
             android:text="@{chat.getTimeAsString}"
