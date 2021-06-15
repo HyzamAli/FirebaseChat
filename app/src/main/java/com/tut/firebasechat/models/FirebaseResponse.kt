@@ -6,6 +6,8 @@ enum class FirebaseResponse {
     INVALID_CREDENTIALS,
     QUOTA_EXCEED,
     CODE_SENT,
+    OTP_TIMEOUT,
+    INVALID_USER,
     FIRE_STORE_EXCEPTION,
     DUPLICATE_USERNAME,
     FAILURE_UNKNOWN /** Unknown Cause, Check log for Failure type and update Enum */
