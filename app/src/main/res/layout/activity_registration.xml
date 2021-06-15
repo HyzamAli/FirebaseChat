@@ -7,6 +7,18 @@
     tools:context=".views.activities.RegistrationActivity"
     android:padding="@dimen/material_padding">
 
+    <ImageView
+        android:id="@+id/image_container"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        tools:src="@drawable/ic_avatar"
+        android:contentDescription="@string/description_placeholder"
+        app:layout_constraintBottom_toTopOf="@id/name_container"
+        app:layout_constraintStart_toStartOf="parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginBottom="@dimen/material_padding"/>
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/name_container"
         android:layout_width="match_parent"
@@ -22,9 +34,24 @@
             android:inputType="textPersonName"/>
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/username_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_username"
+        android:layout_marginTop="@dimen/material_padding"
+        app:layout_constraintTop_toBottomOf="@id/name_container">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/username_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:maxLength="20"
+            android:inputType="textPersonName"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_submit"
-        app:layout_constraintTop_toBottomOf="@id/name_container"
+        app:layout_constraintTop_toBottomOf="@id/username_container"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

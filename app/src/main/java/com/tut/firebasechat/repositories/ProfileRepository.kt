@@ -1,5 +1,6 @@
 package com.tut.firebasechat.repositories
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.Pager
@@ -10,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.models.ResponseWrapper
 import com.tut.firebasechat.models.User
@@ -64,15 +66,59 @@ object ProfileRepository {
             ), pagingSourceFactory = { UsersSource(usernameQuery) }
     ).flow
 
-    fun putProfileDetails(user: User?): LiveData<ResponseWrapper<FirebaseResponse>> {
-        val response: MutableLiveData<ResponseWrapper<FirebaseResponse>> = MutableLiveData()
-        if (user == null) response.value = ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS)
+    /**
+     * Return true if a username exists, else returns false
+    * */
+    suspend fun checkUsernameExists(username: String) = withContext(defaultDispatcher) {
+        var response: ResponseWrapper<Boolean> = ResponseWrapper((FirebaseResponse.FAILURE_UNKNOWN))
+        FirebaseFirestore.getInstance()
+                .collection(USER_COLLECTIONS)
+                .whereEqualTo("username", username)
+                .get()
+                .addOnSuccessListener { snapshot ->
+                    response = if (snapshot.isEmpty) {
+                        ResponseWrapper((FirebaseResponse.SUCCESS), false)
+                    }
+                    else ResponseWrapper((FirebaseResponse.SUCCESS), true)
+                }.addOnFailureListener{
+                    response = ResponseWrapper((FirebaseResponse.FAILURE_UNKNOWN))
+                }.await()
+        response
+    }
+
+    suspend fun putImage(uri: Uri) = withContext(defaultDispatcher) {
+        var response: ResponseWrapper<String> = ResponseWrapper(FirebaseResponse.FAILURE_UNKNOWN)
+        val storageRef = FirebaseStorage.getInstance()
+                .getReference("${USER_COLLECTIONS}/${FirebaseAuth.getInstance().currentUser!!.uid}.jpg")
+
+        storageRef.putFile(uri)
+                .addOnSuccessListener {response = ResponseWrapper(FirebaseResponse.SUCCESS) }
+                .addOnFailureListener {
+                    response = ResponseWrapper(FirebaseResponse.FAILURE_UNKNOWN)}
+                .await()
+        if (response.response == FirebaseResponse.SUCCESS) {
+            storageRef.downloadUrl
+                    .addOnSuccessListener { response =
+                            ResponseWrapper(FirebaseResponse.SUCCESS, it.toString())}
+                    .addOnFailureListener {
+                        response =
+                            ResponseWrapper(FirebaseResponse.FAILURE_UNKNOWN)}
+                    .await()
+        }
+        response
+    }
+
+    suspend fun putProfileDetails(user: User?) = withContext(defaultDispatcher) {
+        var response: FirebaseResponse = FirebaseResponse.FAILURE_UNKNOWN
+        if (user == null) response = FirebaseResponse.INVALID_CREDENTIALS
         else {
             reference.set(user)
-                .addOnSuccessListener { response.value = ResponseWrapper(FirebaseResponse.SUCCESS) }
-                .addOnFailureListener { exception -> parseException(exception, response) }
+                    .addOnSuccessListener { response = (FirebaseResponse.SUCCESS) }
+                    .addOnFailureListener {
+                        response = (FirebaseResponse.FAILURE_UNKNOWN) }
+                    .await()
         }
-        return response
+        response
     }
 
     private fun <T> parseException(exception: Exception): ResponseWrapper<T>{
