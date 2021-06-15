@@ -6,11 +6,12 @@ import com.google.firebase.auth.FirebaseAuthActionCodeException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.tut.firebasechat.models.FirebaseResponse
+import com.tut.firebasechat.models.ResponseWrapper
 import timber.log.Timber
 import java.lang.Exception
 
 object ResponseParser {
-    fun exceptionParser(e: Exception): FirebaseResponse {
+    fun parseException(e: Exception): FirebaseResponse {
         Timber.d("putProfileDetails: Exception %s", e.message?:"null message")
         return when (e) {
             // When No Network Connectivity is present
@@ -27,4 +28,7 @@ object ResponseParser {
             else -> FirebaseResponse.FAILURE_UNKNOWN
         }
     }
+
+    fun <T> parseException(e: Exception) =
+        ResponseWrapper<T>(parseException(e))
 }

@@ -34,7 +34,7 @@ object AuthRepository {
                 }
 
                 override fun onVerificationFailed(e: FirebaseException) {
-                    response.value = ResponseParser.exceptionParser(e)
+                    response.value = ResponseParser.parseException(e)
                 }
 
                 override fun onCodeSent(vToken: String, p1: PhoneAuthProvider.ForceResendingToken) {
@@ -53,7 +53,7 @@ object AuthRepository {
         firebaseAuth.signInWithCredential(credential)
             .addOnSuccessListener { response = FirebaseResponse.SUCCESS }
             .addOnFailureListener{ exception ->
-                response = ResponseParser.exceptionParser(exception)
+                response = ResponseParser.parseException(exception)
             }.await()
         response
     }
