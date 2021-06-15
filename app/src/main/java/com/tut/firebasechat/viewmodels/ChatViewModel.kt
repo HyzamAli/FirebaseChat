@@ -77,7 +77,9 @@ class ChatViewModel: ViewModel() {
         }
     }
 
-     fun getIndexByUser(userId: String): Int {
+    suspend fun createChat(user2: String) = repository.createChat(user2)
+
+    fun getIndexByUser(userId: String): Int {
         chatManagers.value?.forEachIndexed { i,chatManager ->
             if (chatManager.user.id == userId) return i
         }
