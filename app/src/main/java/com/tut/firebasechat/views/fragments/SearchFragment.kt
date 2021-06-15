@@ -75,10 +75,9 @@ class SearchFragment : Fragment(), androidx.appcompat.widget.SearchView.OnQueryT
                 chat = chatViewModel.chatManagers.value?.get(index)?.chat
             }
         }
-        chat?.let {
-            val action = SearchFragmentDirections.actionSearchToMessages(it.docId)
-            NavHostFragment.findNavController(this).navigate(action)
-        }
+        val action = SearchFragmentDirections.actionSearchToMessages(chat?.docId?:"",
+                user?.id?:"")
+        NavHostFragment.findNavController(this).navigate(action)
     }
 
     override fun onDestroyView() {

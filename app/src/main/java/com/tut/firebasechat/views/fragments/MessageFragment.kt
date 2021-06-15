@@ -11,10 +11,12 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.ConcatAdapter
+import com.google.firebase.Timestamp
 import com.tut.firebasechat.databinding.FragmentMessageBinding
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.models.Message
 import com.tut.firebasechat.utilities.ViewUtility
+import com.tut.firebasechat.viewmodels.ChatViewModel
 import com.tut.firebasechat.viewmodels.MessageViewModel
 import com.tut.firebasechat.views.adapters.LiveMessageListAdapter
 import com.tut.firebasechat.views.adapters.MessageListAdapter
@@ -22,12 +24,14 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import timber.log.Timber
 
 class MessageFragment : Fragment() {
 
     private lateinit var binding: FragmentMessageBinding
     private lateinit var viewModel: MessageViewModel
     private val args: MessageFragmentArgs by navArgs()
+    private lateinit var messageId: String
     private lateinit var adapter: ConcatAdapter
     private lateinit var previousMessageAdapter: MessageListAdapter
     private lateinit var liveMessageAdapter: LiveMessageListAdapter
@@ -45,19 +49,29 @@ class MessageFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        messageId = args.messageId
+        Timber.d("doc %s and user %s", messageId, args.user2)
         previousMessageAdapter = MessageListAdapter()
         liveMessageAdapter = LiveMessageListAdapter()
         adapter = ConcatAdapter(listOf(liveMessageAdapter, previousMessageAdapter))
         binding.recyclerList.adapter = adapter
         binding.btnSubmit.setOnClickListener { postMessage(binding.messageField.text.toString()) }
-        getPreviousMessages()
+        if (messageId != "") getPreviousMessages()
     }
 
     private fun postMessage(content: String) {
         if (content.isEmpty()) return
         binding.messageField.setText("")
         lifecycleScope.launch {
-            val response = viewModel.postMessage(args.messageId, content)
+            if (messageId  == "") {
+                val chatViewModel = ViewModelProvider(requireActivity()).get(ChatViewModel::class.java)
+                val responseWrapper = chatViewModel.createChat(args.user2)
+                if (responseWrapper.response == FirebaseResponse.SUCCESS) {
+                    messageId = responseWrapper.data!!
+                    getLiveMessageStream(Timestamp.now())
+                }
+            }
+            val response = viewModel.postMessage(messageId, content)
             if (response != FirebaseResponse.SUCCESS) {
                 //TODO: proper error handling
                 ViewUtility.showSnack(requireActivity(),"Something failed")
@@ -68,7 +82,7 @@ class MessageFragment : Fragment() {
     private fun getPreviousMessages() {
         var firstCollectionData = true
         jobGetPrevMessages = lifecycleScope.launch {
-            viewModel.getPrevMessages(args.messageId).distinctUntilChanged()
+            viewModel.getPrevMessages(messageId).distinctUntilChanged()
                     .collectLatest {
                         if (firstCollectionData) getLiveMessageStream().also {
                             firstCollectionData = false
@@ -78,9 +92,9 @@ class MessageFragment : Fragment() {
         }
     }
 
-    private fun getLiveMessageStream() {
+    private fun getLiveMessageStream(startTime: Timestamp? = null) {
         jobGetLiveMessages = lifecycleScope.launch {
-            viewModel.getLiveMessageStream(args.messageId).distinctUntilChanged()
+            viewModel.getLiveMessageStream(messageId, startTime).distinctUntilChanged()
                     .collect { responseWrapper ->
                         if (responseWrapper.response == FirebaseResponse.SUCCESS) {
                             responseWrapper.data?.let {
