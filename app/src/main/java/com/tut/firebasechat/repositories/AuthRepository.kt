@@ -52,9 +52,8 @@ object AuthRepository {
         val credential = PhoneAuthProvider.getCredential(verificationToken, code)
         firebaseAuth.signInWithCredential(credential)
             .addOnSuccessListener { response = FirebaseResponse.SUCCESS }
-            .addOnFailureListener{ exception ->
-                response = ResponseParser.parseException(exception)
-            }.await()
+            .addOnFailureListener{ response = ResponseParser.parseException(it) }
+            .await()
         response
     }
 }
