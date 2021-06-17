@@ -19,10 +19,9 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
     private val repository = ProfileRepository
     private var user: User? = null
     private val app = getApplication<Application>()
-    val regResponse: MutableLiveData<FirebaseResponse> = MutableLiveData()
     private val defaultDispatcher = Dispatchers.IO
 
-    fun putProfileDetails(name: String, username: String, imgUri: Uri?) = viewModelScope.launch {
+    fun putProfileDetails(name: String, username: String, imgUri: Uri?) = liveData(defaultDispatcher) {
         val checkUsernameExistsResponse = repository.checkUsernameExists(username)
 
         if (checkUsernameExistsResponse.response == FirebaseResponse.SUCCESS) {
@@ -33,35 +32,35 @@ class ProfileViewModel(application: Application) : AndroidViewModel(application)
                 }
 
                 if (putImageResponse == null ||
-                        putImageResponse.response == FirebaseResponse.SUCCESS) {
+                    putImageResponse.response == FirebaseResponse.SUCCESS) {
 
                     val token =
-                            getStore().
-                            getString(app.getString(R.string.KEY_FCM_TOKEN), "")!!
+                        getStore().
+                        getString(app.getString(R.string.KEY_FCM_TOKEN), "")!!
 
                     AuthRepository.getFirebaseUser()?.let{ firebaseUser ->
 
                         user = User(name = name,
-                                phone =  firebaseUser.phoneNumber!!,
-                                token = token,
-                                username = username,
-                                dp_url=putImageResponse?.data?:"")
+                            phone =  firebaseUser.phoneNumber!!,
+                            token = token,
+                            username = username,
+                            dp_url = putImageResponse?.data?:"")
 
                         val putDetailsResponse = repository.putProfileDetails(user)
 
                         if (putDetailsResponse ==  FirebaseResponse.SUCCESS) {
                             putProfileCompleted(tokenAdded = true)
                         }
-                        regResponse.postValue(putDetailsResponse)
+                        emit(putDetailsResponse)
                     }
                 } else {
-                    regResponse.postValue(putImageResponse.response)
+                    emit(putImageResponse.response)
                 }
             } else {
-                regResponse.postValue(FirebaseResponse.DUPLICATE_USERNAME)
+                emit(FirebaseResponse.DUPLICATE_USERNAME)
             }
         } else {
-            regResponse.postValue(checkUsernameExistsResponse.response)
+            emit(checkUsernameExistsResponse.response)
         }
     }
 
