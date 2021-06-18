@@ -14,6 +14,8 @@ class ChatViewModel: ViewModel() {
 
     private val repository = ChatRepository
 
+    private val defaultDispatcher = Dispatchers.IO
+
     val chatManagers: MutableLiveData<MutableList<ChatManager>> =
         MutableLiveData(mutableListOf())
 
@@ -69,7 +71,9 @@ class ChatViewModel: ViewModel() {
         }
     }
 
-    suspend fun createChat(user2: String) = repository.createChat(user2)
+    fun createChat(user2: String) = liveData(defaultDispatcher) {
+        emit(repository.createChat(user2))
+    }
 
     fun getIndexByUser(userId: String): Int {
         chatManagers.value?.forEachIndexed { i,chatManager ->
