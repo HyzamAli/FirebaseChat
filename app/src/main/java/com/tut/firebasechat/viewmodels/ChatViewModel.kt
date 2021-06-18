@@ -2,13 +2,13 @@ package com.tut.firebasechat.viewmodels
 
 import androidx.lifecycle.*
 import com.tut.firebasechat.models.*
-import com.tut.firebasechat.repositories.AuthRepository
 import com.tut.firebasechat.repositories.ChatRepository
 import com.tut.firebasechat.repositories.ProfileRepository
+import com.tut.firebasechat.repositories.ResponseParser
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
-import timber.log.Timber
+import java.lang.Exception
 
 class ChatViewModel: ViewModel() {
 
@@ -25,21 +25,17 @@ class ChatViewModel: ViewModel() {
     get() = _response
 
     init {
-        Timber.d("Init Chat ViewModel, chat managers size %d", chatManagers.value!!.size)
         getChats()
     }
 
     private fun getChats() = viewModelScope.launch {
-        Timber.d("Trying to get chats")
         repository.getChats()
-            .catch { _response.postValue(FirebaseResponse.FAILURE_UNKNOWN)}
+            .catch { _response.postValue(ResponseParser.parseException(it as Exception))}
             .collect { responseWrapper ->
-                Timber.d("Data change notified from firebase")
                 if (responseWrapper.response == FirebaseResponse.SUCCESS) {
                     getChatManagers(responseWrapper.data)
                 } else {
-                    Timber.d("Error retrieving changes from firebase")
-                    _response.postValue(FirebaseResponse.FAILURE_UNKNOWN)
+                    _response.postValue(responseWrapper.response)
                     this.cancel()
                 }
             }
@@ -47,7 +43,6 @@ class ChatViewModel: ViewModel() {
 
     private fun getChatManagers(chats: List<Chat>?) = viewModelScope.launch {
         if (chats == null) this.cancel()
-        Timber.d("chats size: %s, now trying to get users", chats?.size)
         chats?.forEach { chat ->
             val status = chat.chatStatus
             if (status == STATUS.ADDED) {
@@ -55,9 +50,7 @@ class ChatViewModel: ViewModel() {
                 if (responseWrapper.response == FirebaseResponse.SUCCESS) {
                     responseWrapper.data?.let {
                         userSet.add(it.id)
-                        Timber.d("received user successfully")
                         chatManagers.value?.add(0, ChatManager(responseWrapper.data, chat))
-                        Timber.d("chat managers size: %s", chatManagers.value!!.size)
                         chatManagers.notifyObserverFromThread()
                     }
                 } else {
@@ -65,7 +58,6 @@ class ChatViewModel: ViewModel() {
                     this.cancel()
                 }
             } else if (status == STATUS.MODIFIED){
-                Timber.d("user already present modifying list")
                 chatManagers.value?.let {
                     val oldIndex = getIndexByUser(chat.party_id)
                     val oldUser = it[oldIndex].user

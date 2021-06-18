@@ -1,7 +1,6 @@
 package com.tut.firebasechat.repositories
 
 import com.google.firebase.FirebaseException
-import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.*
 import com.tut.firebasechat.models.*
@@ -11,12 +10,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import timber.log.Timber
-
-
-const val USER_COLLECTIONS = "Users"
-const val CHAT_COLLECTIONS = "Chats"
-const val TIME_STAMP_FIELD = "time_stamp"
 
 object ChatRepository {
 
@@ -46,11 +39,11 @@ object ChatRepository {
         val subscription = chatReference.orderBy(TIME_STAMP_FIELD)
             .addSnapshotListener{ snapshot, e ->
             if (e != null) {
-                offer(parseException(e))
+                offer(ResponseParser.parseException<List<Chat>>(e))
                 close(e)
             }
             if (snapshot == null) {
-                offer(parseException(FirebaseException("Null Snapshot")))
+                offer(ResponseParser.parseException<List<Chat>>(FirebaseException("Null Snapshot")))
                 close(e)
             }
             try {
@@ -67,7 +60,7 @@ object ChatRepository {
                 }
                 offer(ResponseWrapper(FirebaseResponse.SUCCESS, chatList.toList()))
             } catch (exception: Exception) {
-                offer(parseException(exception))
+                offer(ResponseParser.parseException<List<Chat>>(exception))
                 close(e)
             }
         }
@@ -76,24 +69,19 @@ object ChatRepository {
 
     suspend fun createChat(user2: String) = withContext(defaultDispatcher) {
         lateinit var response: ResponseWrapper<String>
-        val dataMap = mapOf(
-                "party_one" to  FirebaseAuth.getInstance().currentUser!!.uid,
-                "party_two" to user2
-        )
-        chatCollectionReference.add(dataMap)
+        if(user2 == "") response = ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS)
+        else {
+            val dataMap = mapOf(
+                PARTY_ONE_FIELD to  FirebaseAuth.getInstance().currentUser!!.uid,
+                PARTY_TWO_FIELD to user2
+            )
+            chatCollectionReference.add(dataMap)
                 .addOnSuccessListener { result ->
                     response = ResponseWrapper(FirebaseResponse.SUCCESS, result.id)
-                }.addOnFailureListener { exception -> response = parseException(exception)
-                }.await()
-        response
-    }
-
-    private fun <T> parseException(exception: Exception): ResponseWrapper<T>{
-        Timber.d("putProfileDetails: Exception %s", exception.message?:"null message")
-        return when(exception) {
-            is FirebaseNetworkException -> ResponseWrapper(FirebaseResponse.NO_INTERNET)
-            is FirebaseFirestoreException -> ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS) //TODO: add correct exception
-            else -> ResponseWrapper(FirebaseResponse.FAILURE_UNKNOWN)
+                }
+                .addOnFailureListener { response = ResponseParser.parseException<String>(it) }
+                .await()
         }
+        response
     }
 }
