@@ -4,11 +4,9 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.google.firebase.FirebaseException
-import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
 import com.tut.firebasechat.models.*
 import kotlinx.coroutines.Dispatchers
@@ -18,7 +16,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import java.lang.Exception
 
 object MessageRepository {
@@ -38,21 +35,15 @@ object MessageRepository {
 
     suspend fun postMessage(messageDocId: String, message: Message): FirebaseResponse =
             withContext(defaultDispatcher) {
-                var response = FirebaseResponse.SUCCESS
+                lateinit var response: FirebaseResponse
                 FirebaseFirestore.getInstance()
                         .collection(CHAT_COLLECTIONS)
                         .document(messageDocId)
                         .collection(MESSAGE_COLLECTIONS)
                         .add(message)
-                        .addOnFailureListener{exception ->
-                            response =when(exception) {
-                                is FirebaseNetworkException -> FirebaseResponse.NO_INTERNET
-                                is FirebaseFirestore -> FirebaseResponse.FIRE_STORE_EXCEPTION
-                                else -> FirebaseResponse.FAILURE_UNKNOWN
-                            }
-                        }
+                        .addOnSuccessListener { response = FirebaseResponse.SUCCESS }
+                        .addOnFailureListener{ ResponseParser.parseException(it) }
                         .await()
-
                 response
     }
 
@@ -66,11 +57,13 @@ object MessageRepository {
                 .orderBy(TIME_STAMP_FIELD,Query.Direction.DESCENDING)
                 .addSnapshotListener{snapshot, e ->
                     if (e != null) {
-                        offer(parseException(e))
+                        offer(ResponseParser.parseException<List<Message>>(e))
                         close(e)
                     }
                     if (snapshot == null) {
-                        offer(parseException(FirebaseException("Null Snapshot")))
+                        offer(ResponseParser
+                            .parseException<List<Message>>(FirebaseException("Null Snapshot"))
+                        )
                         close(e)
                     }
                     try {
@@ -81,19 +74,10 @@ object MessageRepository {
                         }
                         offer(ResponseWrapper(FirebaseResponse.SUCCESS, chatList.toList()))
                     } catch (e: Exception) {
-                        offer(parseException(e))
+                        offer(ResponseParser.parseException<List<Message>>(e))
                         close(e)
                     }
                 }
         awaitClose{subscription.remove()}
-    }
-
-    private fun <T> parseException(exception: Exception): ResponseWrapper<T> {
-        Timber.d("MessageRepository: Exception %s", exception.message?:"null message")
-        return when(exception) {
-            is FirebaseNetworkException -> ResponseWrapper(FirebaseResponse.NO_INTERNET)
-            is FirebaseFirestoreException -> ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS) //TODO: add correct exception
-            else -> ResponseWrapper(FirebaseResponse.FAILURE_UNKNOWN)
-        }
     }
 }
