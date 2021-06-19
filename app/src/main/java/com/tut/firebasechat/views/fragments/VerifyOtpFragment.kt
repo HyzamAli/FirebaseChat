@@ -46,12 +46,12 @@ class VerifyOtpFragment : BaseFragment() {
         binding.buttonSubmit.isEnabled = false
         viewModel.verifyOTP(code).observe(viewLifecycleOwner) { response ->
             binding.buttonSubmit.isEnabled = true
-            if (response ==  FirebaseResponse.SUCCESS) intentHome()
+            if (response ==  FirebaseResponse.SUCCESS) intentRegistration()
             else handleError(response)
         }
     }
 
-    private fun intentHome() {
+    private fun intentRegistration() {
         Intent(requireActivity(), RegistrationActivity::class.java).apply {
             startActivity(this)
             requireActivity().finish()
