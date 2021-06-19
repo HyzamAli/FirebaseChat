@@ -93,15 +93,15 @@ class RegistrationActivity : AppCompatActivity() {
             return
         }
         binding.buttonSubmit.isEnabled = false
-        viewModel.regResponse.observe(this) { response ->
-            binding.buttonSubmit.isEnabled = false
-            when(response) {
-                FirebaseResponse.SUCCESS -> intentHome()
-                FirebaseResponse.INVALID_CREDENTIALS -> ViewUtility.showSnack(this, "Error, try later") // TODO: login again
-                else -> ViewUtility.showSnack(this, "Error, try later")
-            }
-        }
         viewModel.putProfileDetails(name, username, croppedImageUri)
+            .observe(this) { response ->
+                binding.buttonSubmit.isEnabled = true
+                when(response) {
+                    FirebaseResponse.SUCCESS -> intentHome()
+                    FirebaseResponse.INVALID_CREDENTIALS -> ViewUtility.showSnack(this, "Error, try later") // TODO: login again
+                    else -> ViewUtility.showSnack(this, "Error, try later")
+                }
+            }
     }
 
     private fun intentHome() {

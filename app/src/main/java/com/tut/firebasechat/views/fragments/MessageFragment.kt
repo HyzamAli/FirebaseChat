@@ -15,7 +15,6 @@ import com.google.firebase.Timestamp
 import com.tut.firebasechat.databinding.FragmentMessageBinding
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.models.Message
-import com.tut.firebasechat.utilities.ViewUtility
 import com.tut.firebasechat.viewmodels.ChatViewModel
 import com.tut.firebasechat.viewmodels.MessageViewModel
 import com.tut.firebasechat.views.adapters.LiveMessageListAdapter
@@ -24,7 +23,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import timber.log.Timber
 
 class MessageFragment : Fragment() {
 
@@ -50,7 +48,6 @@ class MessageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         messageId = args.messageId
-        Timber.d("doc %s and user %s", messageId, args.user2)
         previousMessageAdapter = MessageListAdapter()
         liveMessageAdapter = LiveMessageListAdapter()
         adapter = ConcatAdapter(listOf(liveMessageAdapter, previousMessageAdapter))
@@ -62,19 +59,22 @@ class MessageFragment : Fragment() {
     private fun postMessage(content: String) {
         if (content.isEmpty()) return
         binding.messageField.setText("")
-        lifecycleScope.launch {
-            if (messageId  == "") {
-                val chatViewModel = ViewModelProvider(requireActivity()).get(ChatViewModel::class.java)
-                val responseWrapper = chatViewModel.createChat(args.user2)
-                if (responseWrapper.response == FirebaseResponse.SUCCESS) {
-                    messageId = responseWrapper.data!!
-                    getLiveMessageStream(Timestamp.now())
+        if (messageId == "") {
+            ViewModelProvider(requireActivity()).get(ChatViewModel::class.java)
+                .createChat(args.user2).observe(viewLifecycleOwner) { responseWrapper ->
+                    if (responseWrapper.response == FirebaseResponse.SUCCESS) {
+                        messageId = responseWrapper.data!!
+                        getLiveMessageStream(Timestamp.now())
+                        postMessage(content)
+                    } else {
+                        // TODO: handle failure
+                    }
                 }
-            }
-            val response = viewModel.postMessage(messageId, content)
-            if (response != FirebaseResponse.SUCCESS) {
-                //TODO: proper error handling
-                ViewUtility.showSnack(requireActivity(),"Something failed")
+        } else {
+            viewModel.postMessage(messageId, content).observe(viewLifecycleOwner) { response ->
+                if (response != FirebaseResponse.SUCCESS) {
+                    // TODO: handle failure
+                }
             }
         }
     }
