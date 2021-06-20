@@ -8,9 +8,15 @@ import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 
 object ViewUtility {
-    fun showSnack(activity: Activity, message:String, duration: Int = Snackbar.LENGTH_SHORT) {
+    fun showSnack(activity: Activity, message:String, duration: Int = Snackbar.LENGTH_SHORT,
+                  runnable: (() -> Unit)? = null) {
         val rootView: View = activity.window.decorView.findViewById(android.R.id.content)
-        Snackbar.make(rootView, message, duration).show()
+        if(runnable == null) Snackbar.make(rootView, message, duration).show()
+        else {
+            Snackbar.make(rootView, message, duration)
+                .setAction("RETRY"){ runnable.invoke() }
+                .show()
+        }
     }
 
     fun showToast(context: Context, message:String, duration: Int = Toast.LENGTH_SHORT) {

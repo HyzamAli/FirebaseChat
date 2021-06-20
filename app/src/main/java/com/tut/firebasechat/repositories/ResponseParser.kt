@@ -12,7 +12,7 @@ import java.lang.Exception
 
 object ResponseParser {
     fun parseException(e: Exception): FirebaseResponse {
-        Timber.d("putProfileDetails: Exception %s", e.message?:"null message")
+        Timber.d("parseException: Exception %s", e.message?:"null message")
         return when (e) {
             // When No Network Connectivity is present
             is FirebaseNetworkException -> FirebaseResponse.NO_INTERNET
