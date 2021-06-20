@@ -9,14 +9,16 @@ import kotlinx.coroutines.Dispatchers
 class AuthViewModel : ViewModel() {
     private val repository = AuthRepository
     private val defaultDispatcher = Dispatchers.IO
+    var phoneNumber = "+91"
+    var otpCode = ""
 
     fun isUserSignedIn() = repository.isUserSignedIn()
 
     fun signOutUser() = repository.signOutUser()
 
-    fun requestOTP(phone: String, activity: Activity) = repository.requestOTP(phone, activity)
+    fun requestOTP(activity: Activity) = repository.requestOTP(phoneNumber, activity)
 
-    fun verifyOTP(code: String) = liveData(defaultDispatcher) {
-        emit(repository.verifyOTP(code))
+    fun verifyOTP() = liveData(defaultDispatcher) {
+        emit(repository.verifyOTP(otpCode))
     }
 }
