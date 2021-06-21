@@ -13,12 +13,16 @@ import com.tut.firebasechat.databinding.FragmentVerifyOtpBinding
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.utilities.ViewUtility
 import com.tut.firebasechat.viewmodels.AuthViewModel
+import com.tut.firebasechat.viewmodels.ProfileViewModel
+import com.tut.firebasechat.views.activities.HomeActivity
 import com.tut.firebasechat.views.activities.RegistrationActivity
 
 
 class VerifyOtpFragment : BaseFragment() {
     private lateinit var binding: FragmentVerifyOtpBinding
     private lateinit var viewModel: AuthViewModel
+    private val destinationHome = 37
+    private val destinationRegistration = 45
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,7 +65,7 @@ class VerifyOtpFragment : BaseFragment() {
             hideLoadingUI()
             binding.buttonSubmit.isEnabled = true
             when (response) {
-                FirebaseResponse.SUCCESS -> intentRegistration()
+                FirebaseResponse.SUCCESS -> isProfileExists()
                 FirebaseResponse.INVALID_CREDENTIALS -> {
                     ViewUtility.showSnack(requireActivity(), getString(R.string.text_invalid_otp))
                 }
@@ -70,11 +74,29 @@ class VerifyOtpFragment : BaseFragment() {
         }
     }
 
-    private fun intentRegistration() {
-        Intent(requireActivity(), RegistrationActivity::class.java).apply {
-            startActivity(this)
-            requireActivity().finish()
+    private fun intentTo(destination: Int) {
+        Intent(requireActivity(),
+            if (destination == destinationRegistration) RegistrationActivity::class.java
+            else HomeActivity::class.java)
+            .apply {
+                startActivity(this)
+                requireActivity().finish()
         }
+    }
+
+    private fun isProfileExists() {
+        showLoadingUI()
+        binding.buttonSubmit.isEnabled = false
+        val profileViewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
+        profileViewModel.isProfileExists()
+            .observe(requireActivity()) { responseWrapper ->
+                hideLoadingUI()
+                binding.buttonSubmit.isEnabled = true
+                if (responseWrapper.response == FirebaseResponse.SUCCESS) {
+                    if (profileViewModel.isProfileCompleted()) intentTo(destinationHome)
+                    else intentTo(destinationRegistration)
+                } else handleError(responseWrapper.response){isProfileExists()}
+            }
     }
 
     override fun showLoadingUI() {
