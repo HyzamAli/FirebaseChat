@@ -13,7 +13,7 @@ object ViewUtility {
         val rootView: View = activity.window.decorView.findViewById(android.R.id.content)
         if(runnable == null) Snackbar.make(rootView, message, duration).show()
         else {
-            Snackbar.make(rootView, message, duration)
+            Snackbar.make(rootView, message, Snackbar.LENGTH_INDEFINITE)
                 .setAction("RETRY"){ runnable.invoke() }
                 .show()
         }

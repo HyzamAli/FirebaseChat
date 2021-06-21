@@ -27,6 +27,9 @@ object ProfileRepository {
     private val reference: DocumentReference =
         usersReference.document(firebaseAuth.currentUser!!.uid)
 
+    private val imgStorageRef = FirebaseStorage.getInstance()
+        .getReference("${USER_COLLECTIONS}/${FirebaseAuth.getInstance().currentUser!!.uid}.jpg")
+
     suspend fun isProfileExists(): ResponseWrapper<Boolean> = withContext(defaultDispatcher) {
         try {
             val result = reference.get().await()
@@ -71,11 +74,9 @@ object ProfileRepository {
     }
 
     suspend fun putImage(uri: Uri): ResponseWrapper<String> = withContext(defaultDispatcher) {
-        val storageRef = FirebaseStorage.getInstance()
-            .getReference("${USER_COLLECTIONS}/${FirebaseAuth.getInstance().currentUser!!.uid}.jpg")
         try {
-            storageRef.putFile(uri).await()
-            val result = storageRef.downloadUrl.await()
+            imgStorageRef.putFile(uri).await()
+            val result = imgStorageRef.downloadUrl.await()
             ResponseWrapper(FirebaseResponse.SUCCESS, result.toString())
         } catch (e: Exception) {
             ResponseParser.parseException<String>(e)
@@ -95,6 +96,30 @@ object ProfileRepository {
     suspend fun putFcmToken(token: String): FirebaseResponse = withContext(defaultDispatcher){
         try {
             usersReference.document(firebaseAuth.currentUser!!.uid).update(TOKEN_FIELD, token).await()
+            FirebaseResponse.SUCCESS
+        } catch (e: Exception) {
+            ResponseParser.parseException(e)
+        }
+    }
+
+    suspend fun putNewUserDetails(username: String,
+                                  name: String,
+                                  token: String,
+                                  imageUri: Uri? = null) = withContext(defaultDispatcher) {
+
+        try {
+            val checkUserResult = usersReference.whereEqualTo(USERNAME_FIELD, username).get().await()
+            if (!checkUserResult.isEmpty) return@withContext FirebaseResponse.DUPLICATE_USERNAME
+            var imageUrl = ""
+            imageUri?.let {
+                imgStorageRef.putFile(imageUri).await()
+                val downloadUrlResult = imgStorageRef.downloadUrl.await()
+                imageUrl = downloadUrlResult.toString()
+            }
+            val phone = firebaseAuth.currentUser!!.phoneNumber!!
+            val user =
+                User(username = username, name = name, token = token, phone = phone, dp_url = imageUrl)
+            reference.set(user).await()
             FirebaseResponse.SUCCESS
         } catch (e: Exception) {
             ResponseParser.parseException(e)
