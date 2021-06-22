@@ -55,11 +55,11 @@ class VerifyOtpFragment : BaseFragment() {
             return
         }
         viewModel.otpCode = code
+        ViewUtility.hideKeyboard(requireActivity())
         verifyOtp()
     }
 
     private fun verifyOtp() {
-        ViewUtility.hideKeyboard(requireActivity())
         showLoadingUI()
         binding.buttonSubmit.isEnabled = false
         viewModel.verifyOTP().observe(viewLifecycleOwner) { response ->

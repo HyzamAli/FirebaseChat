@@ -57,10 +57,8 @@ class RequestOtpFragment : BaseFragment() {
 
     private fun requestOtp() {
         showLoadingUI()
-        binding.buttonSubmit.isEnabled = false
         viewModel.requestOTP(requireActivity()).observe(viewLifecycleOwner) { response ->
             hideLoadingUI()
-            binding.buttonSubmit.isEnabled = true
             when (response) {
                 FirebaseResponse.CODE_SENT -> {
                     NavHostFragment.findNavController(this).navigate(R.id.requestToVerify)
@@ -76,11 +74,15 @@ class RequestOtpFragment : BaseFragment() {
     override fun showLoadingUI() {
         super.showLoadingUI()
         binding.progressbar.show()
+        binding.buttonSubmit.isEnabled = false
     }
 
     override fun hideLoadingUI(): Boolean {
         val shouldHide = super.hideLoadingUI()
-        if (shouldHide) binding.progressbar.hide()
+        if (shouldHide) {
+            binding.progressbar.hide()
+            binding.buttonSubmit.isEnabled = true
+        }
         return shouldHide
     }
 }

@@ -95,7 +95,6 @@ class RegistrationActivity : AppCompatActivity() {
     }
 
     private fun putProfileDetails() {
-        ViewUtility.hideKeyboard(this)
         val name = binding.nameField.text.toString()
         val username = binding.usernameField.text.toString()
         if (name.length<3){
@@ -107,6 +106,7 @@ class RegistrationActivity : AppCompatActivity() {
             return
         }
 
+        ViewUtility.hideKeyboard(this)
         showLoadingUi()
         viewModel.username = username
         viewModel.name = name
