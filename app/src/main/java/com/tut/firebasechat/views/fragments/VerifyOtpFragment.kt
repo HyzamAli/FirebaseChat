@@ -59,6 +59,7 @@ class VerifyOtpFragment : BaseFragment() {
     }
 
     private fun verifyOtp() {
+        ViewUtility.hideKeyboard(requireActivity())
         showLoadingUI()
         binding.buttonSubmit.isEnabled = false
         viewModel.verifyOTP().observe(viewLifecycleOwner) { response ->
@@ -86,12 +87,10 @@ class VerifyOtpFragment : BaseFragment() {
 
     private fun isProfileExists() {
         showLoadingUI()
-        binding.buttonSubmit.isEnabled = false
         val profileViewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
         profileViewModel.isProfileExists()
             .observe(requireActivity()) { responseWrapper ->
                 hideLoadingUI()
-                binding.buttonSubmit.isEnabled = true
                 if (responseWrapper.response == FirebaseResponse.SUCCESS) {
                     if (profileViewModel.isProfileCompleted()) intentTo(destinationHome)
                     else intentTo(destinationRegistration)
@@ -102,11 +101,17 @@ class VerifyOtpFragment : BaseFragment() {
     override fun showLoadingUI() {
         super.showLoadingUI()
         binding.progressbar.show()
+        binding.buttonSubmit.isEnabled = false
+        binding.otpField.isEnabled = false
     }
 
     override fun hideLoadingUI(): Boolean {
         val shouldHide = super.hideLoadingUI()
-        if (shouldHide) binding.progressbar.hide()
+        if (shouldHide) {
+            binding.progressbar.hide()
+            binding.buttonSubmit.isEnabled = true
+            binding.otpField.isEnabled = true
+        }
         return shouldHide
     }
 }
