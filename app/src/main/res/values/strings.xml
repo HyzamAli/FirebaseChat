@@ -20,4 +20,9 @@
     <string name="hint_enter_name">Enter Name</string>
     <string name="description_placeholder">placeholder</string>
     <string name="hint_username">Username</string>
+    <string name="error_invalid_name">Enter Valid Name</string>
+    <string name="error_invalid_username">Enter Valid Username</string>
+    <string name="errror_duplicate_username">Username Already Exists, try another</string>
+    <string name="error_no_internet">No Internet</string>
+    <string name="error_try_again">Try Again</string>
 </resources>
