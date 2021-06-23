@@ -57,4 +57,14 @@
         android:layout_height="wrap_content"
         android:text="@string/text_continue"
         android:layout_marginTop="@dimen/material_padding_half"/>
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progressbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/button_submit"
+        android:layout_marginTop="@dimen/material_padding"
+        android:visibility="gone"
+        android:indeterminate="true"
+        tools:visibility="visible"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

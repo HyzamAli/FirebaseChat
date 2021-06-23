@@ -48,12 +48,12 @@ object AuthRepository {
     }
 
     suspend fun verifyOTP(code: String) = withContext(defaultDispatcher) {
-        lateinit var response: FirebaseResponse
         val credential = PhoneAuthProvider.getCredential(verificationToken, code)
-        firebaseAuth.signInWithCredential(credential)
-            .addOnSuccessListener { response = FirebaseResponse.SUCCESS }
-            .addOnFailureListener{ response = ResponseParser.parseException(it) }
-            .await()
-        response
+        try{
+            firebaseAuth.signInWithCredential(credential).await()
+            FirebaseResponse.SUCCESS
+        } catch (e: Exception) {
+            ResponseParser.parseException(e)
+        }
     }
 }

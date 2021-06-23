@@ -21,41 +21,35 @@ object ProfileRepository {
     private val firebaseAuth: FirebaseAuth = FirebaseAuth.getInstance()
     private val defaultDispatcher = Dispatchers.IO
 
-    private val reference: DocumentReference = FirebaseFirestore
-        .getInstance()
-        .collection("Users")
-        .document(firebaseAuth.currentUser!!.uid)
-
     private val usersReference: CollectionReference =
-            FirebaseFirestore.getInstance().collection("Users")
+        FirebaseFirestore.getInstance().collection(USER_COLLECTIONS)
 
-    suspend fun isProfileExists() = withContext(defaultDispatcher) {
-        lateinit var response: ResponseWrapper<Boolean>
-        reference.get()
-            .addOnSuccessListener { result ->
-                response =
-                    if(result.exists()) ResponseWrapper(FirebaseResponse.SUCCESS, true)
-                    else ResponseWrapper(FirebaseResponse.SUCCESS, false)
-            }
-            .addOnFailureListener{ response = ResponseParser.parseException<Boolean>(it) }
-            .await()
-        response
+    private val reference: DocumentReference =
+        usersReference.document(firebaseAuth.currentUser!!.uid)
+
+    private val imgStorageRef = FirebaseStorage.getInstance()
+        .getReference("${USER_COLLECTIONS}/${FirebaseAuth.getInstance().currentUser!!.uid}.jpg")
+
+    suspend fun isProfileExists(): ResponseWrapper<Boolean> = withContext(defaultDispatcher) {
+        try {
+            val result = reference.get().await()
+            if (result.exists()) ResponseWrapper(FirebaseResponse.SUCCESS, true)
+            else ResponseWrapper(FirebaseResponse.SUCCESS, false)
+        } catch (e: Exception) {
+            ResponseParser.parseException<Boolean>(e)
+        }
     }
 
     suspend fun getProfile(uid: String): ResponseWrapper<User> = withContext(defaultDispatcher) {
-        lateinit var response: ResponseWrapper<User>
-        usersReference.document(uid)
-            .get()
-            .addOnSuccessListener { result ->
-                response =
-                    if(result.exists()) {
-                        ResponseWrapper(FirebaseResponse.SUCCESS, result.toObject(User::class.java))
-                    }
-                    else ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS)
+        try {
+            val result = usersReference.document(uid).get().await()
+            if (result.exists()) {
+                ResponseWrapper(FirebaseResponse.SUCCESS, result.toObject(User::class.java))
             }
-            .addOnFailureListener{ response = ResponseParser.parseException<User>(it) }
-            .await()
-        response
+            else ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS)
+        } catch (e: Exception) {
+            ResponseParser.parseException<User>(e)
+        }
     }
 
     fun getProfilesByName(usernameQuery: String): Flow<PagingData<User>> = Pager(
@@ -68,62 +62,67 @@ object ProfileRepository {
     /**
      * Return true if a username exists, else returns false
     * */
-    suspend fun checkUsernameExists(username: String) = withContext(defaultDispatcher) {
-        lateinit var response: ResponseWrapper<Boolean>
-        FirebaseFirestore.getInstance()
-                .collection(USER_COLLECTIONS)
-                .whereEqualTo(USERNAME_FIELD, username)
-                .get()
-                .addOnSuccessListener { snapshot ->
-                    response =
-                        if (snapshot.isEmpty) ResponseWrapper((FirebaseResponse.SUCCESS), false)
-                        else ResponseWrapper((FirebaseResponse.SUCCESS), true)
-                }.addOnFailureListener{ response = ResponseParser.parseException<Boolean>(it) }
-            .await()
-        response
+    suspend fun checkUsernameExists(username: String): ResponseWrapper<Boolean> =
+        withContext(defaultDispatcher) {
+            try {
+                val result = usersReference.whereEqualTo(USERNAME_FIELD, username).get().await()
+                if (result.isEmpty) ResponseWrapper((FirebaseResponse.SUCCESS), false)
+                else ResponseWrapper((FirebaseResponse.SUCCESS), true)
+            } catch (e: Exception) {
+                ResponseParser.parseException<Boolean>(e)
+            }
     }
 
-    suspend fun putImage(uri: Uri) = withContext(defaultDispatcher) {
-        lateinit var response: ResponseWrapper<String>
-        val storageRef = FirebaseStorage.getInstance()
-                .getReference("${USER_COLLECTIONS}/${FirebaseAuth.getInstance().currentUser!!.uid}.jpg")
-
-        storageRef.putFile(uri)
-                .addOnSuccessListener { response = ResponseWrapper(FirebaseResponse.SUCCESS) }
-                .addOnFailureListener { response = ResponseParser.parseException<String>(it) }
-                .await()
-
-        if (response.response == FirebaseResponse.SUCCESS) {
-            storageRef.downloadUrl
-                    .addOnSuccessListener {
-                        response = ResponseWrapper(FirebaseResponse.SUCCESS, it.toString())
-                    }
-                    .addOnFailureListener { response = ResponseParser.parseException<String>(it) }
-                    .await()
+    suspend fun putImage(uri: Uri): ResponseWrapper<String> = withContext(defaultDispatcher) {
+        try {
+            imgStorageRef.putFile(uri).await()
+            val result = imgStorageRef.downloadUrl.await()
+            ResponseWrapper(FirebaseResponse.SUCCESS, result.toString())
+        } catch (e: Exception) {
+            ResponseParser.parseException<String>(e)
         }
-        response
     }
 
-    suspend fun putProfileDetails(user: User?) = withContext(defaultDispatcher) {
-        lateinit var response: FirebaseResponse
-        if (user == null) response = FirebaseResponse.INVALID_CREDENTIALS
-        else {
-            reference.set(user)
-                    .addOnSuccessListener { response = (FirebaseResponse.SUCCESS) }
-                    .addOnFailureListener { response = ResponseParser.parseException(it) }
-                    .await()
+    suspend fun putProfileDetails(user: User?): FirebaseResponse = withContext(defaultDispatcher) {
+        if (user == null) return@withContext FirebaseResponse.INVALID_CREDENTIALS
+        try {
+            reference.set(user).await()
+            FirebaseResponse.SUCCESS
+        } catch (e: Exception) {
+            ResponseParser.parseException(e)
         }
-        response
     }
 
-    suspend fun putFcmToken(token: String): FirebaseResponse {
-        lateinit var response: FirebaseResponse
-        FirebaseFirestore.getInstance().collection("Users")
-            .document(firebaseAuth.currentUser!!.uid)
-            .update("token", token)
-            .addOnSuccessListener { response = FirebaseResponse.SUCCESS }
-            .addOnFailureListener{ response = ResponseParser.parseException(it) }
-            .await()
-        return response
+    suspend fun putFcmToken(token: String): FirebaseResponse = withContext(defaultDispatcher){
+        try {
+            usersReference.document(firebaseAuth.currentUser!!.uid).update(TOKEN_FIELD, token).await()
+            FirebaseResponse.SUCCESS
+        } catch (e: Exception) {
+            ResponseParser.parseException(e)
+        }
+    }
+
+    suspend fun putNewUserDetails(username: String,
+                                  name: String,
+                                  token: String,
+                                  imageUri: Uri? = null) = withContext(defaultDispatcher) {
+
+        try {
+            val checkUserResult = usersReference.whereEqualTo(USERNAME_FIELD, username).get().await()
+            if (!checkUserResult.isEmpty) return@withContext FirebaseResponse.DUPLICATE_USERNAME
+            var imageUrl = ""
+            imageUri?.let {
+                imgStorageRef.putFile(imageUri).await()
+                val downloadUrlResult = imgStorageRef.downloadUrl.await()
+                imageUrl = downloadUrlResult.toString()
+            }
+            val phone = firebaseAuth.currentUser!!.phoneNumber!!
+            val user =
+                User(username = username, name = name, token = token, phone = phone, dp_url = imageUrl)
+            reference.set(user).await()
+            FirebaseResponse.SUCCESS
+        } catch (e: Exception) {
+            ResponseParser.parseException(e)
+        }
     }
 }
