@@ -33,7 +33,6 @@ object ChatRepository {
      * currently not implemented - list update on DELETION of chats
      * https://firebase.google.com/docs/reference/android/com/google/firebase/firestore/DocumentChange
      */
-    //TODO: handle errors more specifically
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getChats() = callbackFlow {
         val subscription = chatReference.orderBy(TIME_STAMP_FIELD)
@@ -67,21 +66,18 @@ object ChatRepository {
         awaitClose{subscription.remove()}
     }
 
-    suspend fun createChat(user2: String) = withContext(defaultDispatcher) {
-        lateinit var response: ResponseWrapper<String>
-        if(user2 == "") response = ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS)
-        else {
+    suspend fun createChat(user2: String): ResponseWrapper<String> =
+        withContext(defaultDispatcher) {
+            if(user2 == "") return@withContext ResponseWrapper(FirebaseResponse.INVALID_CREDENTIALS)
             val dataMap = mapOf(
                 PARTY_ONE_FIELD to  FirebaseAuth.getInstance().currentUser!!.uid,
                 PARTY_TWO_FIELD to user2
             )
-            chatCollectionReference.add(dataMap)
-                .addOnSuccessListener { result ->
-                    response = ResponseWrapper(FirebaseResponse.SUCCESS, result.id)
-                }
-                .addOnFailureListener { response = ResponseParser.parseException<String>(it) }
-                .await()
-        }
-        response
+            try {
+                val result = chatCollectionReference.add(dataMap).await()
+                ResponseWrapper(FirebaseResponse.SUCCESS, result.id)
+            } catch (e: Exception) {
+                ResponseParser.parseException<String>(e)
+            }
     }
 }
