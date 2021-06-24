@@ -35,16 +35,17 @@ object MessageRepository {
 
     suspend fun postMessage(messageDocId: String, message: Message): FirebaseResponse =
             withContext(defaultDispatcher) {
-                lateinit var response: FirebaseResponse
-                FirebaseFirestore.getInstance()
+                try {
+                    FirebaseFirestore.getInstance()
                         .collection(CHAT_COLLECTIONS)
                         .document(messageDocId)
                         .collection(MESSAGE_COLLECTIONS)
                         .add(message)
-                        .addOnSuccessListener { response = FirebaseResponse.SUCCESS }
-                        .addOnFailureListener{ ResponseParser.parseException(it) }
                         .await()
-                response
+                    FirebaseResponse.SUCCESS
+                } catch (e: Exception) {
+                    ResponseParser.parseException(e)
+                }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
