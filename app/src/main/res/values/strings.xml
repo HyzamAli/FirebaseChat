@@ -6,6 +6,8 @@
     <string name="hint_otp_here">OTP here</string>
     <string name="text_invalid_phone">Enter Valid Phone number</string>
     <string name="text_invalid_otp">Entered OTP is Invalid</string>
+    <string name="text_sign_in">Sign In with your Phone</string>
+    <string name="text_enter_otp_received">Enter OTP Received</string>
 
     <!-- Offline Store -->
     <string name="STORE">STORE</string>
