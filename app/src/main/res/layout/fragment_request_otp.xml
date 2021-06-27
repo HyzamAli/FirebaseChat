@@ -4,8 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".views.fragments.RequestOtpFragment"
-    android:padding="@dimen/material_padding">
+    tools:context=".views.fragments.RequestOtpFragment">
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/signInText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_sign_in"
+        style="@style/login_text_style"
+        android:layout_margin="@dimen/material_padding"
+        app:layout_constraintBottom_toTopOf="@id/phone_container"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/phone_container"
@@ -13,8 +22,8 @@
         android:layout_height="wrap_content"
         android:hint="@string/hint_phone_number"
         app:prefixText="@string/hint_country_code"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:layout_margin="@dimen/material_padding"
+        app:layout_constraintBottom_toTopOf="@id/button_submit">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/phone_field"
             android:layout_width="match_parent"
@@ -25,21 +34,22 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_submit"
-        app:layout_constraintTop_toBottomOf="@id/phone_container"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_width="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/text_continue"
-        android:layout_marginTop="@dimen/material_padding_half"/>
+        android:layout_marginStart="@dimen/material_padding"
+        android:layout_marginEnd="@dimen/material_padding"
+        android:layout_marginBottom="@dimen/material_padding_double"/>
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progressbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/material_padding"
         android:visibility="gone"
         android:indeterminate="true"
-        app:layout_constraintTop_toBottomOf="@id/button_submit"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:trackThickness="@dimen/material_padding_half"
         tools:visibility="visible"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

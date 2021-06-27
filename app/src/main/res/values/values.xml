@@ -2,6 +2,7 @@
 <resources>
     <dimen name="material_padding">16dp</dimen>
     <dimen name="material_padding_half">8dp</dimen>
+    <dimen name="material_padding_double">32dp</dimen>
     <dimen name="chat_offset">32dp</dimen>
     <dimen name="card_corner_radius">4dp</dimen>
     <dimen name="chat_message_size">16sp</dimen>

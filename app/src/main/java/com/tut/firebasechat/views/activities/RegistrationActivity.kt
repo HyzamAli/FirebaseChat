@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
 import com.tut.firebasechat.R
@@ -90,6 +92,7 @@ class RegistrationActivity : AppCompatActivity() {
 
     private fun setDp(uri: Uri? = null) {
         Glide.with(this)
+            .applyDefaultRequestOptions(RequestOptions.bitmapTransform(RoundedCorners(25)))
             .load(uri ?: ContextCompat.getDrawable(this, R.drawable.ic_avatar))
             .into(binding.imageContainer)
     }

@@ -13,9 +13,11 @@
         android:theme="@style/Theme.FirebaseChat">
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat"/>
-        <activity android:name=".views.activities.RegistrationActivity"/>
+        <activity android:name=".views.activities.RegistrationActivity"
+            android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".views.activities.HomeActivity" />
-        <activity android:name=".views.activities.AuthActivity" />
+        <activity android:name=".views.activities.AuthActivity"
+            android:windowSoftInputMode="adjustResize"/>
         <activity android:name=".views.activities.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
