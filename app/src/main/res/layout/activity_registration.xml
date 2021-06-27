@@ -4,28 +4,52 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".views.activities.RegistrationActivity"
-    android:padding="@dimen/material_padding">
+    tools:context=".views.activities.RegistrationActivity">
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progressbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        android:indeterminate="true"
+        app:trackThickness="@dimen/material_padding_half"
+        tools:visibility="visible"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/registration_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_new_registration"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="@dimen/material_padding_double"
+        style="@style/login_text_style"
+        android:layout_marginStart="@dimen/material_padding"/>
 
     <ImageView
         android:id="@+id/image_container"
-        android:layout_width="110dp"
-        android:layout_height="110dp"
+        android:layout_width="85dp"
+        android:layout_height="85dp"
         tools:src="@drawable/ic_avatar"
         android:contentDescription="@string/description_placeholder"
-        app:layout_constraintBottom_toTopOf="@id/name_container"
+        app:layout_constraintTop_toBottomOf="@id/registration_text"
         app:layout_constraintStart_toStartOf="parent"
         android:clickable="true"
         android:focusable="true"
-        android:layout_marginBottom="@dimen/material_padding"/>
+        android:layout_marginStart="@dimen/material_padding"
+        android:layout_marginTop="@dimen/material_padding_double"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/name_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/hint_name"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        android:layout_marginStart="@dimen/material_padding"
+        android:layout_marginEnd="@dimen/material_padding"
+        android:layout_marginTop="@dimen/material_padding_double"
+        app:helperText="@string/helper_name"
+        app:layout_constraintTop_toBottomOf="@id/image_container">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/name_field"
             android:layout_width="match_parent"
@@ -39,7 +63,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/hint_username"
-        android:layout_marginTop="@dimen/material_padding"
+        app:helperText="@string/helper_username"
+        android:layout_margin="@dimen/material_padding"
         app:layout_constraintTop_toBottomOf="@id/name_container">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/username_field"
@@ -53,18 +78,11 @@
         android:id="@+id/button_submit"
         app:layout_constraintTop_toBottomOf="@id/username_container"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/text_continue"
-        android:layout_marginTop="@dimen/material_padding_half"/>
-
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/progressbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/button_submit"
-        android:layout_marginTop="@dimen/material_padding"
-        android:visibility="gone"
-        android:indeterminate="true"
-        tools:visibility="visible"/>
+        android:text="@string/text_continue"
+        android:layout_marginStart="@dimen/material_padding"
+        android:layout_marginEnd="@dimen/material_padding"
+        android:layout_marginTop="@dimen/material_padding_double"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
