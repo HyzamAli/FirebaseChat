@@ -8,6 +8,7 @@
     <string name="text_invalid_otp">Entered OTP is Invalid</string>
     <string name="text_sign_in">Sign In with your Phone</string>
     <string name="text_enter_otp_received">Enter OTP Received</string>
+    <string name="text_new_registration">New Here? Register Now</string>
 
     <!-- Offline Store -->
     <string name="STORE">STORE</string>
@@ -27,4 +28,6 @@
     <string name="errror_duplicate_username">Username Already Exists, try another</string>
     <string name="error_no_internet">No Internet</string>
     <string name="error_try_again">Try Again</string>
+    <string name="helper_name">This will be the name displayed for your chat recipients</string>
+    <string name="helper_username">This will be your unique identified name used to search for you</string>
 </resources>
