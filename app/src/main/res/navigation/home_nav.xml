@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/activeChatsFragment"
         android:name="com.tut.firebasechat.views.fragments.ActiveChatsFragment"
-        android:label="@string/app_name"
+        android:label="@string/text_messages"
         tools:layout="@layout/fragment_active_chats" >
         <action
             android:id="@+id/action_toMessages"
