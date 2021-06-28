@@ -55,5 +55,9 @@ class NetworkUtility(context: Context) : LiveData<Boolean>() {
             validNetworks.remove(network)
             checkValidNetworks()
         }
+
+        override fun onUnavailable() {
+            checkValidNetworks()
+        }
     }
 }
