@@ -17,11 +17,10 @@
         android:layout_marginStart="@dimen/chat_offset"
         android:layout_marginEnd="@dimen/material_padding_half">
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="wrap_content"
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/chat_bg"
-            app:cardCornerRadius="4dp"
+            style="@style/message_card_sent_style"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
@@ -29,31 +28,29 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-                <TextView
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/message"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@{message.message}"
-                    android:textSize="@dimen/chat_message_size"
-                    android:padding="@dimen/material_padding_half"
+                    style="@style/chat_message_text_style"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     tools:text="Nothing much, just checking upon you ... been a year right" />
 
-                <TextView
+                <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/time_stamp"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="@{message.getTimeAsString}"
-                    android:textSize="@dimen/chat_time_stamp_size"
-                    android:padding="@dimen/material_padding_half"
+                    style="@style/chat_time_text_style"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/message"
                     tools:text="12:30 AM" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
