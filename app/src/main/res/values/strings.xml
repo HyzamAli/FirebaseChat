@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">FirebaseChat</string>
+    <string name="app_name">Snipe</string>
     <string name="hint_phone_number">Phone number</string>
     <string name="hint_country_code">+91</string>
     <string name="text_continue">Continue</string>
@@ -30,4 +30,7 @@
     <string name="error_try_again">Try Again</string>
     <string name="helper_name">This will be the name displayed for your chat recipients</string>
     <string name="helper_username">This will be your unique identified name used to search for you</string>
+    <string name="prompt_offline">You are Offline</string>
+    <string name="prompt_online">You are back Online</string>
+    <string name="text_messages">Your Messages</string>
 </resources>
