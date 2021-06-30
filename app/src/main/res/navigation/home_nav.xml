@@ -30,6 +30,10 @@
             android:name="user2"
             app:argType="string"
             android:defaultValue='' />
+        <argument
+            android:name="user2_name"
+            app:argType="string"
+            android:defaultValue=''/>
     </fragment>
     <fragment
         android:id="@+id/searchFragment"
