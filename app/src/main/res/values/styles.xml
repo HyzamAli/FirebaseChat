@@ -45,4 +45,8 @@
         <item name="android:padding">@dimen/material_padding_half</item>
         <item name="android:textColor">?attr/colorOnPrimary</item>
     </style>
+
+    <style name="chat_name_text_appearance" parent="TextAppearance.AppCompat.Title">
+        <item name="fontFamily">@font/raleway_semibold</item>
+    </style>
 </resources>
