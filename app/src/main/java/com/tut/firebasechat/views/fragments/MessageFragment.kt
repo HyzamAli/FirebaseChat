@@ -12,6 +12,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.ConcatAdapter
 import com.google.firebase.Timestamp
+import com.tut.firebasechat.R
 import com.tut.firebasechat.databinding.FragmentMessageBinding
 import com.tut.firebasechat.models.FirebaseResponse
 import com.tut.firebasechat.models.Message
@@ -42,6 +43,7 @@ class MessageFragment : Fragment() {
     ): View {
         binding = FragmentMessageBinding.inflate(inflater, container, false)
         binding.toolbar.setupWithNavController(NavHostFragment.findNavController(this))
+        binding.toolbar.title = args.user2Name
         viewModel = ViewModelProvider(requireActivity()).get(MessageViewModel::class.java)
         return binding.root
     }
@@ -53,6 +55,10 @@ class MessageFragment : Fragment() {
         adapter = ConcatAdapter(listOf(liveMessageAdapter, previousMessageAdapter))
         binding.recyclerList.adapter = adapter
         binding.btnSubmit.setOnClickListener { postMessage(binding.messageField.text.toString()) }
+        binding.messageField.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) binding.messageContainer.hint = ""
+            else binding.messageContainer.hint = getString(R.string.hint_type_message)
+        }
         if (messageId != "") getPreviousMessages()
     }
 

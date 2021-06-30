@@ -95,8 +95,11 @@ class ActiveChatsFragment : BaseFragment(), ActiveChatListAdapter.ChatClickListe
     }
 
     override fun onChatClicked(chatManager: ChatManager) {
-        val action = ActiveChatsFragmentDirections.actionToMessages(chatManager.chat.docId,
-                chatManager.user.id)
+        val action = ActiveChatsFragmentDirections.actionToMessages(
+            messageId = chatManager.chat.docId,
+            user2 = chatManager.user.id,
+            user2Name = chatManager.user.name
+        )
         NavHostFragment.findNavController(this).navigate(action)
     }
 
