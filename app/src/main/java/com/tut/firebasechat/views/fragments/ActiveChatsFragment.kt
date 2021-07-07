@@ -3,9 +3,7 @@ package com.tut.firebasechat.views.fragments
 import android.content.Context
 import android.os.Bundle
 import android.util.TypedValue
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.annotation.AttrRes
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -95,8 +93,12 @@ class ActiveChatsFragment : BaseFragment(), ActiveChatListAdapter.ChatClickListe
     }
 
     override fun onChatClicked(chatManager: ChatManager) {
-        val action = ActiveChatsFragmentDirections.actionToMessages(chatManager.chat.docId,
-                chatManager.user.id)
+        val action = ActiveChatsFragmentDirections.actionToMessages(
+            messageId = chatManager.chat.docId,
+            user2 = chatManager.user.id,
+            user2Name = chatManager.user.name,
+            user2Dp = chatManager.user.dp_url
+        )
         NavHostFragment.findNavController(this).navigate(action)
     }
 

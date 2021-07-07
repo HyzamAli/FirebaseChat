@@ -23,4 +23,30 @@
         <item name="android:textColor">?attr/colorPrimary</item>
         <item name="fontFamily">sans-serif-medium</item>
     </style>
+
+    <style name="message_card_received_style" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardBackgroundColor">@color/blue_500</item>
+    </style>
+
+    <style name="message_card_sent_style" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">@dimen/card_corner_radius</item>
+        <item name="cardBackgroundColor">@color/light_grey_500</item>
+    </style>
+
+    <style name="chat_message_text_style" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textSize">@dimen/chat_message_size</item>
+        <item name="android:padding">@dimen/material_padding_half</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="chat_time_text_style" parent="Widget.MaterialComponents.TextView">
+        <item name="android:textSize">@dimen/chat_time_stamp_size</item>
+        <item name="android:padding">@dimen/material_padding_half</item>
+        <item name="android:textColor">?attr/colorOnPrimary</item>
+    </style>
+
+    <style name="chat_name_text_appearance" parent="TextAppearance.AppCompat.Title">
+        <item name="fontFamily">@font/raleway_semibold</item>
+    </style>
 </resources>
