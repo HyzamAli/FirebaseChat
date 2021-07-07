@@ -33,4 +33,5 @@
     <string name="prompt_offline">You are Offline</string>
     <string name="prompt_online">You are back Online</string>
     <string name="text_messages">Your Messages</string>
+    <string name="menu_view_profile">View Profile</string>
 </resources>

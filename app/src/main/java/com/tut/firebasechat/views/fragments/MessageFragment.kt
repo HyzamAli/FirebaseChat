@@ -1,16 +1,23 @@
 package com.tut.firebasechat.views.fragments
 
+import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.ui.setupWithNavController
 import androidx.recyclerview.widget.ConcatAdapter
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.request.RequestOptions
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
 import com.google.firebase.Timestamp
 import com.tut.firebasechat.R
 import com.tut.firebasechat.databinding.FragmentMessageBinding
@@ -44,6 +51,7 @@ class MessageFragment : Fragment() {
         binding = FragmentMessageBinding.inflate(inflater, container, false)
         binding.toolbar.setupWithNavController(NavHostFragment.findNavController(this))
         binding.toolbar.title = args.user2Name
+        binding.toolbar.inflateMenu(R.menu.chat_menu)
         viewModel = ViewModelProvider(requireActivity()).get(MessageViewModel::class.java)
         return binding.root
     }
@@ -59,7 +67,28 @@ class MessageFragment : Fragment() {
             if (hasFocus) binding.messageContainer.hint = ""
             else binding.messageContainer.hint = getString(R.string.hint_type_message)
         }
+        setDp()
         if (messageId != "") getPreviousMessages()
+    }
+
+    private fun setDp() {
+        Glide.with(requireContext())
+            .applyDefaultRequestOptions(RequestOptions.bitmapTransform(RoundedCorners(15)))
+            .asBitmap()
+            .load(args.user2Dp)
+            .placeholder(ContextCompat.getDrawable(requireContext(), R.drawable.ic_avatar))
+            .error(ContextCompat.getDrawable(requireContext(), R.drawable.ic_avatar))
+            .into(object : CustomTarget<Bitmap>(){
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    binding.toolbar.menu.findItem(R.id.profile_item).icon =
+                        resource.toDrawable(resources)
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {
+                    binding.toolbar.menu.findItem(R.id.profile_item).icon =
+                        ContextCompat.getDrawable(requireContext(), R.drawable.ic_avatar)
+                }
+            })
     }
 
     private fun postMessage(content: String) {
