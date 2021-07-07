@@ -1,6 +1,13 @@
 # Snipe-Messenger
 Snipe is a chat application for android built using Kotlin and Firestore. Snipe Uses clean architecture and jetpack components alongside Kotlin Coroutines and flows for a smooth experience and efficient functioning.
 
+<p float="left">
+<img src="Resources/login%20screen.png" alt="Login Screen" width="220"/>
+<img src="Resources/registration%20screen.png" alt="Registration Screen" width="220"/>
+<img src="Resources/chat%20screen.png" alt="Chat Screen" width="220"/>
+<img src="Resources/message%20screen.png" alt="Message Screen" width="220"/>
+</p>
+
 #### App Setup Process
 - Clone the repository
 - Create new Firebase project, and link the cloned project with it (You can either do it manually or use Tools > Firebase Assistant )
@@ -15,4 +22,5 @@ Snipe is a chat application for android built using Kotlin and Firestore. Snipe 
   - When prompted to overwrite index.ts, select no
   
 ***Note***
-Cloud Functions requires Firebase Blaze plan for your project, to know more, visit [Firebase Pricing](https://firebase.google.com/pricing)
+- 🚧 🚧 Work in Progress - Some features may not work 🚧 🚧
+- Cloud Functions requires Firebase Blaze plan for your project, to know more, visit [Firebase Pricing](https://firebase.google.com/pricing)
